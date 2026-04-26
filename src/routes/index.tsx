@@ -170,29 +170,42 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-10 lg:py-14 space-y-12">
+        {/* Thesis line — italic serif, the page's voice */}
+        <section className="max-w-3xl">
+          <p className="eyebrow mb-3">The Thesis</p>
+          <p className="font-display italic text-2xl lg:text-3xl text-foreground leading-snug tracking-tight">
+            Disciplined capital, deployed by rule.
+            <span className="text-muted-foreground"> A multi-strategy engine that reads the regime before it reads the price.</span>
+          </p>
+        </section>
+
         {/* Hero metrics */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MetricCard label="Portfolio Value" value={latest ? fmtUSD(latest.portfolio_value) : "—"} sub="Live equity + cash" icon={<DollarSign className="h-4 w-4" />} tone="primary" />
-          <MetricCard label="Daily P&L" value={latest || lastRun ? fmtUSD(dailyPL) : "—"} sub="Today vs last close" icon={<TrendingUp className="h-4 w-4" />} tone={dailyPL >= 0 ? "positive" : "negative"} />
-          <MetricCard label="Total Return" value={latest ? fmtPct(totalReturn) : "—"} sub={latest ? `Since ${fmtTime(first!.created_at)}` : ""} icon={<TrendingUp className="h-4 w-4" />} tone={totalReturn >= 0 ? "positive" : "negative"} />
-          <MetricCard label="Open / Max" value={`${positions.length} / 4`} sub={`${trades.length} total trades · Cash ${latest ? fmtUSD(latest.cash, 0) : "—"}`} icon={<Target className="h-4 w-4" />} />
+        <section>
+          <p className="eyebrow mb-4">Portfolio · Live</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <MetricCard ornament="01" label="Portfolio Value" value={latest ? fmtUSD(latest.portfolio_value) : "—"} sub="Live equity + cash" />
+            <MetricCard ornament="02" label="Daily P&L" value={latest || lastRun ? fmtUSD(dailyPL) : "—"} sub="Today vs last close" tone={dailyPL >= 0 ? "positive" : "negative"} />
+            <MetricCard ornament="03" label="Total Return" value={latest ? fmtPct(totalReturn) : "—"} sub={latest ? `Since ${fmtTime(first!.created_at)}` : ""} tone={totalReturn >= 0 ? "positive" : "negative"} />
+            <MetricCard ornament="04" label="Open / Max" value={`${positions.length} / 4`} sub={`${trades.length} trades · Cash ${latest ? fmtUSD(latest.cash, 0) : "—"}`} />
+          </div>
         </section>
 
         {/* Regime grid */}
         {Object.keys(regimeMap).length > 0 && (
-          <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-            <div className="flex items-center justify-between mb-4">
+          <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
+            <div className="flex items-start justify-between mb-6">
               <div>
-                <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary flex items-center gap-2"><Brain className="h-3.5 w-3.5" /> Market Regime — Per Symbol</h2>
-                <p className="text-sm text-muted-foreground mt-1">Latest regime classification driving strategy selection</p>
+                <p className="eyebrow flex items-center gap-2"><Brain className="h-3 w-3" /> Market Regime</p>
+                <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Per-symbol classification</h2>
+                <p className="text-sm text-muted-foreground mt-1.5">The regime drives strategy selection — never the other way around.</p>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {Object.entries(regimeMap).map(([sym, info]) => (
                 <div key={sym} className={`rounded-lg border p-3 ${REGIME_COLORS[info.regime] ?? REGIME_COLORS.UNKNOWN}`}>
-                  <div className="font-mono font-bold text-sm">{sym}</div>
-                  <div className="font-mono text-[10px] uppercase tracking-wider mt-1 opacity-80">{info.regime.replace("_", " ")}</div>
+                  <div className="font-display text-base font-medium">{sym}</div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] mt-1.5 opacity-80">{info.regime.replace("_", " ")}</div>
                   <div className="font-mono text-[10px] mt-1 opacity-60">conf {info.conf}</div>
                 </div>
               ))}
