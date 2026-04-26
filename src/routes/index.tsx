@@ -224,19 +224,19 @@ function Dashboard() {
               <AreaChart data={equitySeries}>
                 <defs>
                   <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.78 0.16 220)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="oklch(0.78 0.16 220)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="oklch(0.55 0.18 250)" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="oklch(0.55 0.18 250)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="oklch(0.30 0.04 255)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" stroke="oklch(0.62 0.03 250)" fontSize={11} tickLine={false} />
-                <YAxis stroke="oklch(0.62 0.03 250)" fontSize={11} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
+                <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" stroke="oklch(0.50 0.015 250)" fontSize={11} tickLine={false} />
+                <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.21 0.03 250)", border: "1px solid oklch(0.30 0.04 255)", borderRadius: 8, fontFamily: "JetBrains Mono" }}
-                  labelStyle={{ color: "oklch(0.62 0.03 250)" }}
+                  contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8, fontFamily: "JetBrains Mono" }}
+                  labelStyle={{ color: "oklch(0.50 0.015 250)" }}
                   formatter={(v: number) => fmtUSD(v)}
                 />
-                <Area type="monotone" dataKey="equity" stroke="oklch(0.78 0.16 220)" strokeWidth={2} fill="url(#eq)" />
+                <Area type="monotone" dataKey="equity" stroke="oklch(0.55 0.18 250)" strokeWidth={2} fill="url(#eq)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -255,11 +255,11 @@ function Dashboard() {
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stratData}>
-                  <CartesianGrid stroke="oklch(0.30 0.04 255)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="strategy" stroke="oklch(0.62 0.03 250)" fontSize={11} />
-                  <YAxis stroke="oklch(0.62 0.03 250)" fontSize={11} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "oklch(0.21 0.03 250)", border: "1px solid oklch(0.30 0.04 255)", borderRadius: 8 }} />
-                  <Bar dataKey="count" fill="oklch(0.78 0.16 220)" radius={[6, 6, 0, 0]} />
+                  <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="strategy" stroke="oklch(0.50 0.015 250)" fontSize={11} />
+                  <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} allowDecimals={false} />
+                  <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8 }} />
+                  <Bar dataKey="count" fill="oklch(0.55 0.18 250)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -304,10 +304,10 @@ function Dashboard() {
               <div className="mt-6 h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={positions}>
-                    <CartesianGrid stroke="oklch(0.30 0.04 255)" strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="symbol" stroke="oklch(0.62 0.03 250)" fontSize={11} />
-                    <YAxis stroke="oklch(0.62 0.03 250)" fontSize={11} tickFormatter={(v) => `$${v}`} />
-                    <Tooltip contentStyle={{ background: "oklch(0.21 0.03 250)", border: "1px solid oklch(0.30 0.04 255)", borderRadius: 8 }} formatter={(v: number) => fmtUSD(v)} />
+                    <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="symbol" stroke="oklch(0.50 0.015 250)" fontSize={11} />
+                    <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} tickFormatter={(v) => `$${v}`} />
+                    <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8 }} formatter={(v: number) => fmtUSD(v)} />
                     <Bar dataKey="unrealized_pl" radius={[6, 6, 0, 0]}>
                       {positions.map((p) => (
                         <Cell key={p.symbol} fill={p.unrealized_pl >= 0 ? "oklch(0.78 0.18 150)" : "oklch(0.68 0.21 22)"} />
