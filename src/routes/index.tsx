@@ -7,8 +7,9 @@ import { SignalBadge } from "@/components/dashboard/SignalBadge";
 import { fmtUSD, fmtPct, fmtTime } from "@/lib/format";
 import { toast } from "sonner";
 import {
-  Activity, DollarSign, Target, TrendingUp, Play, RefreshCw, CircleDot, Brain, Layers,
-  Zap, Radio, Cpu, Terminal,
+  Activity, Play, RefreshCw, Brain, Layers,
+  Zap, Cpu, Terminal, Briefcase,
+  History as HistoryIcon, LineChart as LineChartIcon, Signal as SignalIcon,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
@@ -125,76 +126,87 @@ function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b border-border/60 bg-card/30 backdrop-blur-xl sticky top-0 z-20 shadow-[0_1px_0_0_color-mix(in_oklab,var(--primary)_15%,transparent)]">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="h-11 w-11 rounded-lg flex items-center justify-center font-mono font-black bg-primary text-primary-foreground">
-                <span className="text-lg">M</span>
-              </div>
-              <Cpu className="absolute -bottom-1 -right-1 h-4 w-4 text-primary bg-background rounded-sm p-0.5 border border-primary/40" />
+      <header className="relative border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20">
+        <div className="absolute inset-0 blueprint-grid opacity-60 pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)" }} />
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-5 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-md flex items-center justify-center bg-primary text-primary-foreground font-display text-xl font-medium tracking-tight">
+              M
             </div>
-            <div>
-              <h1 className="font-mono font-black text-lg leading-tight tracking-tight flex items-center gap-2">
-                MAVERICK
-                <span className="text-primary text-[10px] px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10">v2.0</span>
+            <div className="flex flex-col">
+              <h1 className="font-display text-2xl font-medium leading-none tracking-tight text-foreground flex items-baseline gap-2">
+                Maverick<span className="text-primary">.</span>
+                <span className="eyebrow ml-1 -translate-y-0.5">v2.0</span>
               </h1>
-              <p className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground font-mono flex items-center gap-1.5">
-                <Terminal className="h-2.5 w-2.5" />
-                VWAP·Z · MOMENTUM · ORB · REGIME-ADAPTIVE
+              <p className="eyebrow mt-1.5 text-muted-foreground">
+                Multi-Strategy · Regime-Adaptive Engine
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {lastRun?.halt_entries && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/50 bg-destructive/10 text-destructive font-mono text-xs shadow-[0_0_16px_-6px_var(--destructive)]">
-                <Zap className="h-3 w-3 live-dot" /> DAILY LOSS HALT
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/40 bg-destructive/5 text-destructive text-xs font-medium">
+                <Zap className="h-3 w-3" /> Daily Loss Halt
               </div>
             )}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border/80 bg-card/80 backdrop-blur font-mono text-xs">
-              <Radio className={`h-3 w-3 ${lastRun?.market_open ? "text-success live-dot" : "text-muted-foreground"}`} />
-              <CircleDot className={`h-2 w-2 ${lastRun?.market_open ? "text-success" : "text-muted-foreground"}`} />
-              {lastRun?.market_open ? "MARKET LIVE" : "MARKET CLOSED"}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-card text-xs">
+              <span className={`relative flex h-2 w-2 ${lastRun?.market_open ? "" : "opacity-40"}`}>
+                {lastRun?.market_open && <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />}
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${lastRun?.market_open ? "bg-success" : "bg-muted-foreground"}`} />
+              </span>
+              <span className="eyebrow !text-muted-foreground">{lastRun?.market_open ? "Market Live" : "Market Closed"}</span>
             </div>
-            <Button variant="outline" size="sm" onClick={loadAll} disabled={loading} className="border-border/80 bg-card/60">
+            <Button variant="ghost" size="sm" onClick={loadAll} disabled={loading} className="text-muted-foreground hover:text-foreground">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
             <Button
               onClick={runBot}
               disabled={running}
-              className="font-mono font-bold tracking-wider bg-primary text-primary-foreground hover:bg-primary/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium tracking-wide"
             >
-              <Play className="h-4 w-4 mr-2" fill="currentColor" />
-              {running ? "EXECUTING…" : "RUN CYCLE"}
+              <Play className="h-3.5 w-3.5 mr-2" fill="currentColor" />
+              {running ? "Executing…" : "Run Cycle"}
             </Button>
           </div>
         </div>
-        <div className="h-px shimmer-line" style={{ background: "color-mix(in oklab, var(--primary) 12%, transparent)" }} />
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-10 lg:py-14 space-y-12">
+        {/* Thesis line — italic serif, the page's voice */}
+        <section className="max-w-3xl">
+          <p className="eyebrow mb-3">The Thesis</p>
+          <p className="font-display italic text-2xl lg:text-3xl text-foreground leading-snug tracking-tight">
+            Disciplined capital, deployed by rule.
+            <span className="text-muted-foreground"> A multi-strategy engine that reads the regime before it reads the price.</span>
+          </p>
+        </section>
+
         {/* Hero metrics */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MetricCard label="Portfolio Value" value={latest ? fmtUSD(latest.portfolio_value) : "—"} sub="Live equity + cash" icon={<DollarSign className="h-4 w-4" />} tone="primary" />
-          <MetricCard label="Daily P&L" value={latest || lastRun ? fmtUSD(dailyPL) : "—"} sub="Today vs last close" icon={<TrendingUp className="h-4 w-4" />} tone={dailyPL >= 0 ? "positive" : "negative"} />
-          <MetricCard label="Total Return" value={latest ? fmtPct(totalReturn) : "—"} sub={latest ? `Since ${fmtTime(first!.created_at)}` : ""} icon={<TrendingUp className="h-4 w-4" />} tone={totalReturn >= 0 ? "positive" : "negative"} />
-          <MetricCard label="Open / Max" value={`${positions.length} / 4`} sub={`${trades.length} total trades · Cash ${latest ? fmtUSD(latest.cash, 0) : "—"}`} icon={<Target className="h-4 w-4" />} />
+        <section>
+          <p className="eyebrow mb-4">Portfolio · Live</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <MetricCard ornament="01" label="Portfolio Value" value={latest ? fmtUSD(latest.portfolio_value) : "—"} sub="Live equity + cash" />
+            <MetricCard ornament="02" label="Daily P&L" value={latest || lastRun ? fmtUSD(dailyPL) : "—"} sub="Today vs last close" tone={dailyPL >= 0 ? "positive" : "negative"} />
+            <MetricCard ornament="03" label="Total Return" value={latest ? fmtPct(totalReturn) : "—"} sub={latest ? `Since ${fmtTime(first!.created_at)}` : ""} tone={totalReturn >= 0 ? "positive" : "negative"} />
+            <MetricCard ornament="04" label="Open / Max" value={`${positions.length} / 4`} sub={`${trades.length} trades · Cash ${latest ? fmtUSD(latest.cash, 0) : "—"}`} />
+          </div>
         </section>
 
         {/* Regime grid */}
         {Object.keys(regimeMap).length > 0 && (
-          <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-            <div className="flex items-center justify-between mb-4">
+          <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
+            <div className="flex items-start justify-between mb-6">
               <div>
-                <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary flex items-center gap-2"><Brain className="h-3.5 w-3.5" /> Market Regime — Per Symbol</h2>
-                <p className="text-sm text-muted-foreground mt-1">Latest regime classification driving strategy selection</p>
+                <p className="eyebrow flex items-center gap-2"><Brain className="h-3 w-3" /> Market Regime</p>
+                <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Per-symbol classification</h2>
+                <p className="text-sm text-muted-foreground mt-1.5">The regime drives strategy selection — never the other way around.</p>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {Object.entries(regimeMap).map(([sym, info]) => (
                 <div key={sym} className={`rounded-lg border p-3 ${REGIME_COLORS[info.regime] ?? REGIME_COLORS.UNKNOWN}`}>
-                  <div className="font-mono font-bold text-sm">{sym}</div>
-                  <div className="font-mono text-[10px] uppercase tracking-wider mt-1 opacity-80">{info.regime.replace("_", " ")}</div>
+                  <div className="font-display text-base font-medium">{sym}</div>
+                  <div className="text-[10px] uppercase tracking-[0.18em] mt-1.5 opacity-80">{info.regime.replace("_", " ")}</div>
                   <div className="font-mono text-[10px] mt-1 opacity-60">conf {info.conf}</div>
                 </div>
               ))}
@@ -203,55 +215,57 @@ function Dashboard() {
         )}
 
         {/* Equity curve */}
-        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary">Equity Curve</h2>
-              <p className="text-sm text-muted-foreground mt-1">Portfolio value over time</p>
-            </div>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
+          <div className="mb-6">
+            <p className="eyebrow flex items-center gap-2"><Activity className="h-3 w-3" /> Performance</p>
+            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Equity curve</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">Portfolio value, marked-to-market across every cycle.</p>
           </div>
           {equitySeries.length > 1 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={equitySeries}>
+              <AreaChart data={equitySeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.55 0.18 250)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="oklch(0.55 0.18 250)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0.18} />
+                    <stop offset="100%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" stroke="oklch(0.50 0.015 250)" fontSize={11} tickLine={false} />
-                <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
+                <CartesianGrid stroke="oklch(0.91 0.005 250)" strokeDasharray="2 4" vertical={false} />
+                <XAxis dataKey="label" stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8, fontFamily: "JetBrains Mono" }}
-                  labelStyle={{ color: "oklch(0.50 0.015 250)" }}
+                  contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.91 0.005 250)", borderRadius: 6, fontSize: 12 }}
+                  labelStyle={{ color: "oklch(0.48 0.015 250)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.15em" }}
                   formatter={(v: number) => fmtUSD(v)}
                 />
-                <Area type="monotone" dataKey="equity" stroke="oklch(0.55 0.18 250)" strokeWidth={2} fill="url(#eq)" />
+                <Area type="monotone" dataKey="equity" stroke="oklch(0.28 0.06 255)" strokeWidth={1.5} fill="url(#eq)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[300px] flex flex-col items-center justify-center text-center text-muted-foreground">
-              <Activity className="h-10 w-10 mb-3 opacity-40" />
-              <p className="font-mono text-sm">No snapshots yet</p>
-              <p className="text-xs mt-1">Click <span className="text-primary">RUN CYCLE</span> to capture your first portfolio snapshot.</p>
+            <div className="h-[300px] flex flex-col items-center justify-center text-center text-muted-foreground border border-dashed border-border rounded-lg">
+              <Activity className="h-8 w-8 mb-3 opacity-30" />
+              <p className="font-display italic text-base">No snapshots yet.</p>
+              <p className="text-xs mt-1">Run a cycle to capture your first portfolio snapshot.</p>
             </div>
           )}
         </section>
 
-        {/* Strategy mix + Cash sub-row */}
+        {/* Strategy mix */}
         {stratData.length > 0 && (
-          <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4 flex items-center gap-2"><Layers className="h-3.5 w-3.5" /> Strategy Activity (recent signals)</h2>
-            <div className="h-40">
+          <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
+            <div className="mb-6">
+              <p className="eyebrow flex items-center gap-2"><Layers className="h-3 w-3" /> Strategy Mix</p>
+              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Signal distribution</h2>
+              <p className="text-sm text-muted-foreground mt-1.5">Recent signal counts by strategy.</p>
+            </div>
+            <div className="h-44">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stratData}>
-                  <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="strategy" stroke="oklch(0.50 0.015 250)" fontSize={11} />
-                  <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8 }} />
-                  <Bar dataKey="count" fill="oklch(0.55 0.18 250)" radius={[6, 6, 0, 0]} />
+                <BarChart data={stratData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke="oklch(0.91 0.005 250)" strokeDasharray="2 4" vertical={false} />
+                  <XAxis dataKey="strategy" stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="oklch(0.48 0.015 250)" fontSize={11} allowDecimals={false} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.91 0.005 250)", borderRadius: 6, fontSize: 12 }} />
+                  <Bar dataKey="count" fill="oklch(0.28 0.06 255)" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -259,8 +273,12 @@ function Dashboard() {
         )}
 
         {/* Positions */}
-        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-          <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Open Positions</h2>
+        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
+          <div className="mb-6">
+            <p className="eyebrow">Book</p>
+            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Open positions</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">Live exposure with realized stops &amp; targets.</p>
+          </div>
           {positions.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">No open positions.</p>
           ) : (
@@ -314,8 +332,11 @@ function Dashboard() {
 
         {/* Signals + Trades */}
         <section className="grid lg:grid-cols-2 gap-6">
-          <div className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Recent Signals</h2>
+          <div className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
+            <div className="mb-5">
+              <p className="eyebrow flex items-center gap-2"><SignalIcon className="h-3 w-3" /> Tape</p>
+              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Recent signals</h2>
+            </div>
             <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
               {signals.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No signals yet.</p>}
               {signals.map((s) => (
@@ -343,8 +364,11 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Executed Trades</h2>
+          <div className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
+            <div className="mb-5">
+              <p className="eyebrow flex items-center gap-2"><LineChartIcon className="h-3 w-3" /> Blotter</p>
+              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Executed trades</h2>
+            </div>
             <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
               {trades.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No trades yet.</p>}
               {trades.map((t) => (
@@ -374,8 +398,12 @@ function Dashboard() {
         </section>
 
         {/* Recent runs */}
-        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-          <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Bot Run History</h2>
+        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="mb-6">
+            <p className="eyebrow flex items-center gap-2"><HistoryIcon className="h-3 w-3" /> Audit Log</p>
+            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Cycle history</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">Every run, signed and timestamped.</p>
+          </div>
           {runs.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">No runs yet — kick one off above.</p>
           ) : (
