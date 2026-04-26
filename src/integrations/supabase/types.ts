@@ -14,7 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bot_runs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          id: string
+          market_open: boolean | null
+          message: string | null
+          signals_generated: number | null
+          status: string
+          symbols_processed: number | null
+          trades_executed: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          market_open?: boolean | null
+          message?: string | null
+          signals_generated?: number | null
+          status: string
+          symbols_processed?: number | null
+          trades_executed?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          market_open?: boolean | null
+          message?: string | null
+          signals_generated?: number | null
+          status?: string
+          symbols_processed?: number | null
+          trades_executed?: number | null
+        }
+        Relationships: []
+      }
+      bot_signals: {
+        Row: {
+          atr: number | null
+          created_at: string
+          id: string
+          price: number
+          reason: string | null
+          rsi: number | null
+          signal: string
+          sma_fast: number | null
+          sma_slow: number | null
+          symbol: string
+        }
+        Insert: {
+          atr?: number | null
+          created_at?: string
+          id?: string
+          price: number
+          reason?: string | null
+          rsi?: number | null
+          signal: string
+          sma_fast?: number | null
+          sma_slow?: number | null
+          symbol: string
+        }
+        Update: {
+          atr?: number | null
+          created_at?: string
+          id?: string
+          price?: number
+          reason?: string | null
+          rsi?: number | null
+          signal?: string
+          sma_fast?: number | null
+          sma_slow?: number | null
+          symbol?: string
+        }
+        Relationships: []
+      }
+      bot_trades: {
+        Row: {
+          alpaca_order_id: string | null
+          created_at: string
+          id: string
+          price: number
+          qty: number
+          side: string
+          symbol: string
+          value: number
+        }
+        Insert: {
+          alpaca_order_id?: string | null
+          created_at?: string
+          id?: string
+          price: number
+          qty: number
+          side: string
+          symbol: string
+          value: number
+        }
+        Update: {
+          alpaca_order_id?: string | null
+          created_at?: string
+          id?: string
+          price?: number
+          qty?: number
+          side?: string
+          symbol?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      portfolio_snapshots: {
+        Row: {
+          buying_power: number
+          cash: number
+          created_at: string
+          equity: number
+          id: string
+          portfolio_value: number
+          positions: Json
+        }
+        Insert: {
+          buying_power: number
+          cash: number
+          created_at?: string
+          equity: number
+          id?: string
+          portfolio_value: number
+          positions?: Json
+        }
+        Update: {
+          buying_power?: number
+          cash?: number
+          created_at?: string
+          equity?: number
+          id?: string
+          portfolio_value?: number
+          positions?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

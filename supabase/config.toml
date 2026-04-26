@@ -1,1 +1,2 @@
-project_id = "decvcncoojtelporould"
+[functions.run-bot]
+verify_jwt = false
