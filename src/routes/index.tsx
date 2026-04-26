@@ -214,55 +214,57 @@ function Dashboard() {
         )}
 
         {/* Equity curve */}
-        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary">Equity Curve</h2>
-              <p className="text-sm text-muted-foreground mt-1">Portfolio value over time</p>
-            </div>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
+          <div className="mb-6">
+            <p className="eyebrow flex items-center gap-2"><Activity className="h-3 w-3" /> Performance</p>
+            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Equity curve</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">Portfolio value, marked-to-market across every cycle.</p>
           </div>
           {equitySeries.length > 1 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={equitySeries}>
+              <AreaChart data={equitySeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0.4} />
+                    <stop offset="0%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0.18} />
                     <stop offset="100%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" stroke="oklch(0.50 0.015 250)" fontSize={11} tickLine={false} />
-                <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
+                <CartesianGrid stroke="oklch(0.91 0.005 250)" strokeDasharray="2 4" vertical={false} />
+                <XAxis dataKey="label" stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8, fontFamily: "JetBrains Mono" }}
-                  labelStyle={{ color: "oklch(0.50 0.015 250)" }}
+                  contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.91 0.005 250)", borderRadius: 6, fontSize: 12 }}
+                  labelStyle={{ color: "oklch(0.48 0.015 250)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.15em" }}
                   formatter={(v: number) => fmtUSD(v)}
                 />
-                <Area type="monotone" dataKey="equity" stroke="oklch(0.28 0.06 255)" strokeWidth={2} fill="url(#eq)" />
+                <Area type="monotone" dataKey="equity" stroke="oklch(0.28 0.06 255)" strokeWidth={1.5} fill="url(#eq)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[300px] flex flex-col items-center justify-center text-center text-muted-foreground">
-              <Activity className="h-10 w-10 mb-3 opacity-40" />
-              <p className="font-mono text-sm">No snapshots yet</p>
-              <p className="text-xs mt-1">Click <span className="text-primary">RUN CYCLE</span> to capture your first portfolio snapshot.</p>
+            <div className="h-[300px] flex flex-col items-center justify-center text-center text-muted-foreground border border-dashed border-border rounded-lg">
+              <Activity className="h-8 w-8 mb-3 opacity-30" />
+              <p className="font-display italic text-base">No snapshots yet.</p>
+              <p className="text-xs mt-1">Run a cycle to capture your first portfolio snapshot.</p>
             </div>
           )}
         </section>
 
-        {/* Strategy mix + Cash sub-row */}
+        {/* Strategy mix */}
         {stratData.length > 0 && (
-          <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4 flex items-center gap-2"><Layers className="h-3.5 w-3.5" /> Strategy Activity (recent signals)</h2>
-            <div className="h-40">
+          <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
+            <div className="mb-6">
+              <p className="eyebrow flex items-center gap-2"><Layers className="h-3 w-3" /> Strategy Mix</p>
+              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Signal distribution</h2>
+              <p className="text-sm text-muted-foreground mt-1.5">Recent signal counts by strategy.</p>
+            </div>
+            <div className="h-44">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stratData}>
-                  <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="strategy" stroke="oklch(0.50 0.015 250)" fontSize={11} />
-                  <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8 }} />
-                  <Bar dataKey="count" fill="oklch(0.28 0.06 255)" radius={[6, 6, 0, 0]} />
+                <BarChart data={stratData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke="oklch(0.91 0.005 250)" strokeDasharray="2 4" vertical={false} />
+                  <XAxis dataKey="strategy" stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="oklch(0.48 0.015 250)" fontSize={11} allowDecimals={false} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.91 0.005 250)", borderRadius: 6, fontSize: 12 }} />
+                  <Bar dataKey="count" fill="oklch(0.28 0.06 255)" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -270,8 +272,12 @@ function Dashboard() {
         )}
 
         {/* Positions */}
-        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-          <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Open Positions</h2>
+        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
+          <div className="mb-6">
+            <p className="eyebrow">Book</p>
+            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Open positions</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">Live exposure with realized stops &amp; targets.</p>
+          </div>
           {positions.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">No open positions.</p>
           ) : (
