@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import {
   Activity, Play, RefreshCw, Brain, Layers,
   Zap, Cpu, Terminal, Briefcase,
-  History as HistoryIcon, LineChart as LineChartIcon, Signal as SignalIcon,
+  ClockIcon as HistoryIcon, LineChart as LineChartIcon, Signal as SignalIcon,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
