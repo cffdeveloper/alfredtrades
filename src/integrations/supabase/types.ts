@@ -17,10 +17,13 @@ export type Database = {
       bot_runs: {
         Row: {
           created_at: string
+          daily_pl: number | null
           duration_ms: number | null
+          halt_entries: boolean | null
           id: string
           market_open: boolean | null
           message: string | null
+          regime_summary: Json | null
           signals_generated: number | null
           status: string
           symbols_processed: number | null
@@ -28,10 +31,13 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          daily_pl?: number | null
           duration_ms?: number | null
+          halt_entries?: boolean | null
           id?: string
           market_open?: boolean | null
           message?: string | null
+          regime_summary?: Json | null
           signals_generated?: number | null
           status: string
           symbols_processed?: number | null
@@ -39,10 +45,13 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          daily_pl?: number | null
           duration_ms?: number | null
+          halt_entries?: boolean | null
           id?: string
           market_open?: boolean | null
           message?: string | null
+          regime_summary?: Json | null
           signals_generated?: number | null
           status?: string
           symbols_processed?: number | null
@@ -52,72 +61,102 @@ export type Database = {
       }
       bot_signals: {
         Row: {
+          adx: number | null
           atr: number | null
+          confidence: number | null
           created_at: string
           id: string
           price: number
           reason: string | null
+          regime: string | null
           rsi: number | null
           signal: string
           sma_fast: number | null
           sma_slow: number | null
+          strategy: string | null
           symbol: string
+          vwap: number | null
+          zscore: number | null
         }
         Insert: {
+          adx?: number | null
           atr?: number | null
+          confidence?: number | null
           created_at?: string
           id?: string
           price: number
           reason?: string | null
+          regime?: string | null
           rsi?: number | null
           signal: string
           sma_fast?: number | null
           sma_slow?: number | null
+          strategy?: string | null
           symbol: string
+          vwap?: number | null
+          zscore?: number | null
         }
         Update: {
+          adx?: number | null
           atr?: number | null
+          confidence?: number | null
           created_at?: string
           id?: string
           price?: number
           reason?: string | null
+          regime?: string | null
           rsi?: number | null
           signal?: string
           sma_fast?: number | null
           sma_slow?: number | null
+          strategy?: string | null
           symbol?: string
+          vwap?: number | null
+          zscore?: number | null
         }
         Relationships: []
       }
       bot_trades: {
         Row: {
           alpaca_order_id: string | null
+          confidence: number | null
           created_at: string
           id: string
           price: number
           qty: number
           side: string
+          stop_price: number | null
+          strategy: string | null
           symbol: string
+          target_price: number | null
           value: number
         }
         Insert: {
           alpaca_order_id?: string | null
+          confidence?: number | null
           created_at?: string
           id?: string
           price: number
           qty: number
           side: string
+          stop_price?: number | null
+          strategy?: string | null
           symbol: string
+          target_price?: number | null
           value: number
         }
         Update: {
           alpaca_order_id?: string | null
+          confidence?: number | null
           created_at?: string
           id?: string
           price?: number
           qty?: number
           side?: string
+          stop_price?: number | null
+          strategy?: string | null
           symbol?: string
+          target_price?: number | null
           value?: number
         }
         Relationships: []
@@ -127,6 +166,7 @@ export type Database = {
           buying_power: number
           cash: number
           created_at: string
+          daily_pl: number | null
           equity: number
           id: string
           portfolio_value: number
@@ -136,6 +176,7 @@ export type Database = {
           buying_power: number
           cash: number
           created_at?: string
+          daily_pl?: number | null
           equity: number
           id?: string
           portfolio_value: number
@@ -145,6 +186,7 @@ export type Database = {
           buying_power?: number
           cash?: number
           created_at?: string
+          daily_pl?: number | null
           equity?: number
           id?: string
           portfolio_value?: number
