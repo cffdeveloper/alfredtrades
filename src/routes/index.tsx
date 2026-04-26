@@ -331,8 +331,11 @@ function Dashboard() {
 
         {/* Signals + Trades */}
         <section className="grid lg:grid-cols-2 gap-6">
-          <div className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Recent Signals</h2>
+          <div className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
+            <div className="mb-5">
+              <p className="eyebrow flex items-center gap-2"><SignalIcon className="h-3 w-3" /> Tape</p>
+              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Recent signals</h2>
+            </div>
             <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
               {signals.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No signals yet.</p>}
               {signals.map((s) => (
@@ -360,8 +363,11 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-            <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Executed Trades</h2>
+          <div className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
+            <div className="mb-5">
+              <p className="eyebrow flex items-center gap-2"><LineChartIcon className="h-3 w-3" /> Blotter</p>
+              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Executed trades</h2>
+            </div>
             <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
               {trades.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No trades yet.</p>}
               {trades.map((t) => (
@@ -391,8 +397,12 @@ function Dashboard() {
         </section>
 
         {/* Recent runs */}
-        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
-          <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Bot Run History</h2>
+        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="mb-6">
+            <p className="eyebrow flex items-center gap-2"><History className="h-3 w-3" /> Audit Log</p>
+            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Cycle history</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">Every run, signed and timestamped.</p>
+          </div>
           {runs.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">No runs yet — kick one off above.</p>
           ) : (
