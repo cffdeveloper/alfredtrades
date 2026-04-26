@@ -7,7 +7,8 @@ import { SignalBadge } from "@/components/dashboard/SignalBadge";
 import { fmtUSD, fmtPct, fmtTime } from "@/lib/format";
 import { toast } from "sonner";
 import {
-  Activity, DollarSign, Wallet, Target, TrendingUp, Play, RefreshCw, CircleDot, Brain, Layers,
+  Activity, DollarSign, Target, TrendingUp, Play, RefreshCw, CircleDot, Brain, Layers,
+  Zap, Radio, Cpu, Terminal,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
@@ -124,43 +125,59 @@ function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b border-border bg-card/40 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-border/60 bg-card/30 backdrop-blur-xl sticky top-0 z-20 shadow-[0_1px_0_0_color-mix(in_oklab,var(--primary)_15%,transparent)]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg flex items-center justify-center font-mono font-bold text-primary-foreground" style={{ background: "var(--gradient-primary)", boxShadow: "var(--shadow-glow)" }}>
-              M
+            <div className="relative">
+              <div
+                className="h-11 w-11 rounded-lg flex items-center justify-center font-mono font-black text-primary-foreground glow-ring relative overflow-hidden"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                <span className="relative z-10 text-lg">M</span>
+                <div className="absolute inset-0 opacity-30" style={{
+                  backgroundImage: "linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)",
+                  backgroundSize: "6px 6px",
+                }} />
+              </div>
+              <Cpu className="absolute -bottom-1 -right-1 h-4 w-4 text-primary bg-background rounded-sm p-0.5 border border-primary/40" />
             </div>
             <div>
-              <h1 className="font-mono font-bold text-lg leading-tight">MAVERICK BOT v2</h1>
-              <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground font-mono">
-                VWAP Z-Score · Momentum · ORB · Regime-Adaptive
+              <h1 className="font-mono font-black text-lg leading-tight tracking-tight flex items-center gap-2">
+                MAVERICK
+                <span className="text-primary text-[10px] px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10">v2.0</span>
+              </h1>
+              <p className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground font-mono flex items-center gap-1.5">
+                <Terminal className="h-2.5 w-2.5" />
+                VWAP·Z · MOMENTUM · ORB · REGIME-ADAPTIVE
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {lastRun?.halt_entries && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/40 bg-destructive/10 text-destructive font-mono text-xs">
-                ⛔ DAILY LOSS HALT
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/50 bg-destructive/10 text-destructive font-mono text-xs shadow-[0_0_16px_-6px_var(--destructive)]">
+                <Zap className="h-3 w-3 live-dot" /> DAILY LOSS HALT
               </div>
             )}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-card font-mono text-xs">
-              <CircleDot className={`h-3 w-3 ${lastRun?.market_open ? "text-success animate-pulse" : "text-muted-foreground"}`} />
-              {lastRun?.market_open ? "MARKET OPEN" : "MARKET CLOSED"}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border/80 bg-card/80 backdrop-blur font-mono text-xs">
+              <Radio className={`h-3 w-3 ${lastRun?.market_open ? "text-success live-dot" : "text-muted-foreground"}`} />
+              <CircleDot className={`h-2 w-2 ${lastRun?.market_open ? "text-success" : "text-muted-foreground"}`} />
+              {lastRun?.market_open ? "MARKET LIVE" : "MARKET CLOSED"}
             </div>
-            <Button variant="outline" size="sm" onClick={loadAll} disabled={loading}>
+            <Button variant="outline" size="sm" onClick={loadAll} disabled={loading} className="border-border/80 bg-card/60">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
             <Button
               onClick={runBot}
               disabled={running}
-              className="font-mono"
+              className="font-mono font-bold tracking-wider shadow-[0_0_24px_-6px_var(--primary)] hover:shadow-[0_0_32px_-4px_var(--primary)] transition-shadow"
               style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}
             >
-              <Play className="h-4 w-4 mr-2" />
-              {running ? "RUNNING…" : "RUN CYCLE"}
+              <Play className="h-4 w-4 mr-2" fill="currentColor" />
+              {running ? "EXECUTING…" : "RUN CYCLE"}
             </Button>
           </div>
         </div>
+        <div className="h-px shimmer-line" style={{ background: "color-mix(in oklab, var(--primary) 12%, transparent)" }} />
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
