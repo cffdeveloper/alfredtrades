@@ -191,7 +191,7 @@ function Dashboard() {
 
         {/* Regime grid */}
         {Object.keys(regimeMap).length > 0 && (
-          <section className="rounded-xl border border-border bg-card/60 p-6" style={{ boxShadow: "var(--shadow-card)" }}>
+          <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary flex items-center gap-2"><Brain className="h-3.5 w-3.5" /> Market Regime — Per Symbol</h2>
@@ -211,7 +211,7 @@ function Dashboard() {
         )}
 
         {/* Equity curve */}
-        <section className="rounded-xl border border-border bg-card/60 p-6" style={{ boxShadow: "var(--shadow-card)" }}>
+        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary">Equity Curve</h2>
@@ -250,7 +250,7 @@ function Dashboard() {
 
         {/* Strategy mix + Cash sub-row */}
         {stratData.length > 0 && (
-          <section className="rounded-xl border border-border bg-card/60 p-6" style={{ boxShadow: "var(--shadow-card)" }}>
+          <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
             <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4 flex items-center gap-2"><Layers className="h-3.5 w-3.5" /> Strategy Activity (recent signals)</h2>
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
@@ -267,7 +267,7 @@ function Dashboard() {
         )}
 
         {/* Positions */}
-        <section className="rounded-xl border border-border bg-card/60 p-6" style={{ boxShadow: "var(--shadow-card)" }}>
+        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
           <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Open Positions</h2>
           {positions.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">No open positions.</p>
@@ -322,7 +322,7 @@ function Dashboard() {
 
         {/* Signals + Trades */}
         <section className="grid lg:grid-cols-2 gap-6">
-          <div className="rounded-xl border border-border bg-card/60 p-6" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
             <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Recent Signals</h2>
             <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
               {signals.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No signals yet.</p>}
@@ -351,7 +351,7 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-card/60 p-6" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
             <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Executed Trades</h2>
             <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
               {trades.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No trades yet.</p>}
@@ -382,7 +382,7 @@ function Dashboard() {
         </section>
 
         {/* Recent runs */}
-        <section className="rounded-xl border border-border bg-card/60 p-6" style={{ boxShadow: "var(--shadow-card)" }}>
+        <section className="tech-card rounded-xl border border-border/80 bg-card/50 backdrop-blur-sm p-6" style={{ boxShadow: "var(--shadow-card)" }}>
           <h2 className="font-mono text-xs uppercase tracking-[0.25em] text-primary mb-4">Bot Run History</h2>
           {runs.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">No runs yet — kick one off above.</p>
