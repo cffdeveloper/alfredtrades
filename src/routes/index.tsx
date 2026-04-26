@@ -7,8 +7,9 @@ import { SignalBadge } from "@/components/dashboard/SignalBadge";
 import { fmtUSD, fmtPct, fmtTime } from "@/lib/format";
 import { toast } from "sonner";
 import {
-  Activity, DollarSign, Target, TrendingUp, Play, RefreshCw, CircleDot, Brain, Layers,
-  Zap, Radio, Cpu, Terminal,
+  Activity, Play, RefreshCw, Brain, Layers,
+  Zap, Cpu, Terminal, Briefcase,
+  History as HistoryIcon, LineChart as LineChartIcon, Signal as SignalIcon,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
