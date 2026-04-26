@@ -34,10 +34,14 @@ export const Route = createRootRoute({
       { name: "description", content: "Algorithmic paper-trading dashboard powered by Golden Cross + RSI + ATR." },
       { name: "author", content: "Maverick" },
       { property: "og:title", content: "Maverick Bot" },
-      { property: "og:description", content: "Algorithmic paper-trading dashboard." },
+      { property: "og:description", content: "Algorithmic paper-trading dashboard powered by Golden Cross + RSI + ATR." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Maverick Bot" },
+      { name: "twitter:description", content: "Algorithmic paper-trading dashboard powered by Golden Cross + RSI + ATR." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/af76d2f8-04a0-478d-b72e-155f4cedb11e/id-preview-b3ee3e09--1ad13328-eb2c-4c64-b370-a7587cc0e8ea.lovable.app-1777243101040.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/af76d2f8-04a0-478d-b72e-155f4cedb11e/id-preview-b3ee3e09--1ad13328-eb2c-4c64-b370-a7587cc0e8ea.lovable.app-1777243101040.png" },
     ],
     links: [
       {
