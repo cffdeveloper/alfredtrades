@@ -125,51 +125,49 @@ function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b border-border/60 bg-card/30 backdrop-blur-xl sticky top-0 z-20 shadow-[0_1px_0_0_color-mix(in_oklab,var(--primary)_15%,transparent)]">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="h-11 w-11 rounded-lg flex items-center justify-center font-mono font-black bg-primary text-primary-foreground">
-                <span className="text-lg">M</span>
-              </div>
-              <Cpu className="absolute -bottom-1 -right-1 h-4 w-4 text-primary bg-background rounded-sm p-0.5 border border-primary/40" />
+      <header className="relative border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20">
+        <div className="absolute inset-0 blueprint-grid opacity-60 pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)" }} />
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-5 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-md flex items-center justify-center bg-primary text-primary-foreground font-display text-xl font-medium tracking-tight">
+              M
             </div>
-            <div>
-              <h1 className="font-mono font-black text-lg leading-tight tracking-tight flex items-center gap-2">
-                MAVERICK
-                <span className="text-primary text-[10px] px-1.5 py-0.5 rounded border border-primary/40 bg-primary/10">v2.0</span>
+            <div className="flex flex-col">
+              <h1 className="font-display text-2xl font-medium leading-none tracking-tight text-foreground flex items-baseline gap-2">
+                Maverick<span className="text-primary">.</span>
+                <span className="eyebrow ml-1 -translate-y-0.5">v2.0</span>
               </h1>
-              <p className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground font-mono flex items-center gap-1.5">
-                <Terminal className="h-2.5 w-2.5" />
-                VWAP·Z · MOMENTUM · ORB · REGIME-ADAPTIVE
+              <p className="eyebrow mt-1.5 text-muted-foreground">
+                Multi-Strategy · Regime-Adaptive Engine
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {lastRun?.halt_entries && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/50 bg-destructive/10 text-destructive font-mono text-xs shadow-[0_0_16px_-6px_var(--destructive)]">
-                <Zap className="h-3 w-3 live-dot" /> DAILY LOSS HALT
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/40 bg-destructive/5 text-destructive text-xs font-medium">
+                <Zap className="h-3 w-3" /> Daily Loss Halt
               </div>
             )}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border/80 bg-card/80 backdrop-blur font-mono text-xs">
-              <Radio className={`h-3 w-3 ${lastRun?.market_open ? "text-success live-dot" : "text-muted-foreground"}`} />
-              <CircleDot className={`h-2 w-2 ${lastRun?.market_open ? "text-success" : "text-muted-foreground"}`} />
-              {lastRun?.market_open ? "MARKET LIVE" : "MARKET CLOSED"}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-card text-xs">
+              <span className={`relative flex h-2 w-2 ${lastRun?.market_open ? "" : "opacity-40"}`}>
+                {lastRun?.market_open && <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />}
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${lastRun?.market_open ? "bg-success" : "bg-muted-foreground"}`} />
+              </span>
+              <span className="eyebrow !text-muted-foreground">{lastRun?.market_open ? "Market Live" : "Market Closed"}</span>
             </div>
-            <Button variant="outline" size="sm" onClick={loadAll} disabled={loading} className="border-border/80 bg-card/60">
+            <Button variant="ghost" size="sm" onClick={loadAll} disabled={loading} className="text-muted-foreground hover:text-foreground">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
             <Button
               onClick={runBot}
               disabled={running}
-              className="font-mono font-bold tracking-wider bg-primary text-primary-foreground hover:bg-primary/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium tracking-wide"
             >
-              <Play className="h-4 w-4 mr-2" fill="currentColor" />
-              {running ? "EXECUTING…" : "RUN CYCLE"}
+              <Play className="h-3.5 w-3.5 mr-2" fill="currentColor" />
+              {running ? "Executing…" : "Run Cycle"}
             </Button>
           </div>
         </div>
-        <div className="h-px shimmer-line" style={{ background: "color-mix(in oklab, var(--primary) 12%, transparent)" }} />
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
@@ -216,8 +214,8 @@ function Dashboard() {
               <AreaChart data={equitySeries}>
                 <defs>
                   <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.55 0.18 250)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="oklch(0.55 0.18 250)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
@@ -228,7 +226,7 @@ function Dashboard() {
                   labelStyle={{ color: "oklch(0.50 0.015 250)" }}
                   formatter={(v: number) => fmtUSD(v)}
                 />
-                <Area type="monotone" dataKey="equity" stroke="oklch(0.55 0.18 250)" strokeWidth={2} fill="url(#eq)" />
+                <Area type="monotone" dataKey="equity" stroke="oklch(0.28 0.06 255)" strokeWidth={2} fill="url(#eq)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -251,7 +249,7 @@ function Dashboard() {
                   <XAxis dataKey="strategy" stroke="oklch(0.50 0.015 250)" fontSize={11} />
                   <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} allowDecimals={false} />
                   <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8 }} />
-                  <Bar dataKey="count" fill="oklch(0.55 0.18 250)" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="count" fill="oklch(0.28 0.06 255)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
