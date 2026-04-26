@@ -129,15 +129,8 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div
-                className="h-11 w-11 rounded-lg flex items-center justify-center font-mono font-black text-primary-foreground glow-ring relative overflow-hidden"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                <span className="relative z-10 text-lg">M</span>
-                <div className="absolute inset-0 opacity-30" style={{
-                  backgroundImage: "linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)",
-                  backgroundSize: "6px 6px",
-                }} />
+              <div className="h-11 w-11 rounded-lg flex items-center justify-center font-mono font-black bg-primary text-primary-foreground">
+                <span className="text-lg">M</span>
               </div>
               <Cpu className="absolute -bottom-1 -right-1 h-4 w-4 text-primary bg-background rounded-sm p-0.5 border border-primary/40" />
             </div>
@@ -169,8 +162,7 @@ function Dashboard() {
             <Button
               onClick={runBot}
               disabled={running}
-              className="font-mono font-bold tracking-wider shadow-[0_0_24px_-6px_var(--primary)] hover:shadow-[0_0_32px_-4px_var(--primary)] transition-shadow"
-              style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}
+              className="font-mono font-bold tracking-wider bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Play className="h-4 w-4 mr-2" fill="currentColor" />
               {running ? "EXECUTING…" : "RUN CYCLE"}
