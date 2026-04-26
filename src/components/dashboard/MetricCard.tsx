@@ -16,10 +16,7 @@ export function MetricCard({ label, value, sub, icon, tone = "default" }: Props)
     : tone === "primary" ? "text-primary"
     : "text-foreground";
 
-  const glowColor =
-    tone === "positive" ? "var(--success)"
-    : tone === "negative" ? "var(--destructive)"
-    : "var(--primary)";
+
 
   return (
     <div className="tech-card relative rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
