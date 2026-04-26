@@ -156,10 +156,104 @@
     color: var(--color-foreground);
     font-family: 'Inter', sans-serif;
     background-image:
-      radial-gradient(at 20% 0%, color-mix(in oklab, var(--primary) 10%, transparent) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, color-mix(in oklab, var(--chart-5) 8%, transparent) 0px, transparent 50%);
+      radial-gradient(at 20% 0%, color-mix(in oklab, var(--primary) 14%, transparent) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, color-mix(in oklab, var(--chart-5) 12%, transparent) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, color-mix(in oklab, var(--chart-2) 5%, transparent) 0px, transparent 60%);
     background-attachment: fixed;
+    position: relative;
   }
 
+  /* Animated cyber grid overlay — global */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 90%);
+    animation: grid-drift 60s linear infinite;
+  }
+
+  /* Subtle scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      color-mix(in oklab, var(--primary) 1.5%, transparent) 3px,
+      color-mix(in oklab, var(--primary) 1.5%, transparent) 4px
+    );
+  }
+
+  #root, main, header { position: relative; z-index: 1; }
+
   .font-mono { font-family: var(--font-mono); }
+}
+
+@keyframes grid-drift {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 48px 48px, 48px 48px; }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 50%, transparent), 0 0 30px -8px color-mix(in oklab, var(--primary) 60%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in oklab, var(--primary) 0%, transparent), 0 0 40px -4px color-mix(in oklab, var(--primary) 80%, transparent); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes ticker {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+.glow-ring { animation: pulse-ring 2.5s ease-in-out infinite; }
+.live-dot { animation: ticker 1.4s ease-in-out infinite; }
+
+.shimmer-line {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary) 25%, transparent), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Hex/circuit corner accents on cards */
+.tech-card {
+  position: relative;
+}
+.tech-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 14px; height: 14px;
+  border-top: 1px solid color-mix(in oklab, var(--primary) 60%, transparent);
+  border-left: 1px solid color-mix(in oklab, var(--primary) 60%, transparent);
+  pointer-events: none;
+}
+.tech-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 14px; height: 14px;
+  border-bottom: 1px solid color-mix(in oklab, var(--primary) 60%, transparent);
+  border-right: 1px solid color-mix(in oklab, var(--primary) 60%, transparent);
+  pointer-events: none;
 }
