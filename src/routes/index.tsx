@@ -129,15 +129,8 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div
-                className="h-11 w-11 rounded-lg flex items-center justify-center font-mono font-black text-primary-foreground glow-ring relative overflow-hidden"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                <span className="relative z-10 text-lg">M</span>
-                <div className="absolute inset-0 opacity-30" style={{
-                  backgroundImage: "linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)",
-                  backgroundSize: "6px 6px",
-                }} />
+              <div className="h-11 w-11 rounded-lg flex items-center justify-center font-mono font-black bg-primary text-primary-foreground">
+                <span className="text-lg">M</span>
               </div>
               <Cpu className="absolute -bottom-1 -right-1 h-4 w-4 text-primary bg-background rounded-sm p-0.5 border border-primary/40" />
             </div>
@@ -169,8 +162,7 @@ function Dashboard() {
             <Button
               onClick={runBot}
               disabled={running}
-              className="font-mono font-bold tracking-wider shadow-[0_0_24px_-6px_var(--primary)] hover:shadow-[0_0_32px_-4px_var(--primary)] transition-shadow"
-              style={{ background: "var(--gradient-primary)", color: "var(--primary-foreground)" }}
+              className="font-mono font-bold tracking-wider bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Play className="h-4 w-4 mr-2" fill="currentColor" />
               {running ? "EXECUTING…" : "RUN CYCLE"}
@@ -224,19 +216,19 @@ function Dashboard() {
               <AreaChart data={equitySeries}>
                 <defs>
                   <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.78 0.16 220)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="oklch(0.78 0.16 220)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="oklch(0.55 0.18 250)" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="oklch(0.55 0.18 250)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="oklch(0.30 0.04 255)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" stroke="oklch(0.62 0.03 250)" fontSize={11} tickLine={false} />
-                <YAxis stroke="oklch(0.62 0.03 250)" fontSize={11} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
+                <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" stroke="oklch(0.50 0.015 250)" fontSize={11} tickLine={false} />
+                <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.21 0.03 250)", border: "1px solid oklch(0.30 0.04 255)", borderRadius: 8, fontFamily: "JetBrains Mono" }}
-                  labelStyle={{ color: "oklch(0.62 0.03 250)" }}
+                  contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8, fontFamily: "JetBrains Mono" }}
+                  labelStyle={{ color: "oklch(0.50 0.015 250)" }}
                   formatter={(v: number) => fmtUSD(v)}
                 />
-                <Area type="monotone" dataKey="equity" stroke="oklch(0.78 0.16 220)" strokeWidth={2} fill="url(#eq)" />
+                <Area type="monotone" dataKey="equity" stroke="oklch(0.55 0.18 250)" strokeWidth={2} fill="url(#eq)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -255,11 +247,11 @@ function Dashboard() {
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stratData}>
-                  <CartesianGrid stroke="oklch(0.30 0.04 255)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="strategy" stroke="oklch(0.62 0.03 250)" fontSize={11} />
-                  <YAxis stroke="oklch(0.62 0.03 250)" fontSize={11} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "oklch(0.21 0.03 250)", border: "1px solid oklch(0.30 0.04 255)", borderRadius: 8 }} />
-                  <Bar dataKey="count" fill="oklch(0.78 0.16 220)" radius={[6, 6, 0, 0]} />
+                  <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="strategy" stroke="oklch(0.50 0.015 250)" fontSize={11} />
+                  <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} allowDecimals={false} />
+                  <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8 }} />
+                  <Bar dataKey="count" fill="oklch(0.55 0.18 250)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -304,10 +296,10 @@ function Dashboard() {
               <div className="mt-6 h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={positions}>
-                    <CartesianGrid stroke="oklch(0.30 0.04 255)" strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="symbol" stroke="oklch(0.62 0.03 250)" fontSize={11} />
-                    <YAxis stroke="oklch(0.62 0.03 250)" fontSize={11} tickFormatter={(v) => `$${v}`} />
-                    <Tooltip contentStyle={{ background: "oklch(0.21 0.03 250)", border: "1px solid oklch(0.30 0.04 255)", borderRadius: 8 }} formatter={(v: number) => fmtUSD(v)} />
+                    <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="symbol" stroke="oklch(0.50 0.015 250)" fontSize={11} />
+                    <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} tickFormatter={(v) => `$${v}`} />
+                    <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8 }} formatter={(v: number) => fmtUSD(v)} />
                     <Bar dataKey="unrealized_pl" radius={[6, 6, 0, 0]}>
                       {positions.map((p) => (
                         <Cell key={p.symbol} fill={p.unrealized_pl >= 0 ? "oklch(0.78 0.18 150)" : "oklch(0.68 0.21 22)"} />
