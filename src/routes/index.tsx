@@ -400,7 +400,7 @@ function Dashboard() {
         {/* Recent runs */}
         <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
           <div className="mb-6">
-            <p className="eyebrow flex items-center gap-2"><History className="h-3 w-3" /> Audit Log</p>
+            <p className="eyebrow flex items-center gap-2"><HistoryIcon className="h-3 w-3" /> Audit Log</p>
             <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Cycle history</h2>
             <p className="text-sm text-muted-foreground mt-1.5">Every run, signed and timestamped.</p>
           </div>
