@@ -3,3 +3,6 @@ verify_jwt = false
 
 [functions.review-trade]
 verify_jwt = false
+
+[functions.deriv-bot]
+verify_jwt = false
