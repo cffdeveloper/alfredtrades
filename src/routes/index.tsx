@@ -152,15 +152,16 @@ function Dashboard() {
         <div className="absolute inset-0 blueprint-grid opacity-60 pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)" }} />
         <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 flex items-center justify-between flex-wrap gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-md flex items-center justify-center bg-primary overflow-hidden shrink-0">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-md flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-[var(--gold)]/60 shadow-md">
               <img src={bullMark} alt="Maverick" className="h-full w-full object-cover" />
             </div>
             <div className="flex flex-col min-w-0">
-              <h1 className="font-display text-lg sm:text-2xl font-medium leading-none tracking-tight text-foreground flex items-baseline gap-1.5 sm:gap-2">
-                Maverick<span className="text-primary">.</span>
-                <span className="eyebrow ml-0.5 sm:ml-1 -translate-y-0.5 hidden sm:inline">v2.0</span>
+              <h1 className="font-display text-xl sm:text-3xl font-semibold leading-none tracking-tight flex items-baseline gap-1.5 sm:gap-2">
+                <span className="bg-gradient-to-br from-primary via-[var(--primary-glow)] to-[var(--gold)] bg-clip-text text-transparent">Maverick</span>
+                <span className="text-[var(--gold)]">.</span>
+                <span className="eyebrow ml-0.5 sm:ml-1 -translate-y-1 hidden sm:inline !text-[var(--gold)]">v2.0</span>
               </h1>
-              <p className="eyebrow mt-1 sm:mt-1.5 text-muted-foreground text-[9px] sm:text-[10px] truncate">
+              <p className="font-serif italic mt-0.5 sm:mt-1 text-muted-foreground text-[11px] sm:text-sm truncate tracking-wide">
                 Multi-Strategy · Regime-Adaptive
               </p>
             </div>
