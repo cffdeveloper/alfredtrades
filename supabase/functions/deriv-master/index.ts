@@ -207,7 +207,7 @@ async function runCycle() {
     session = await openWS(token);
     await session.send({ authorize: token });
     const auth = await session.waitFor((m) => m.msg_type === "authorize" || m.error, 10_000);
-    if (auth.error) throw new Error("auth: " + auth.error.message);
+    if (auth.error) throw new Error("auth[" + (auth.error.code ?? "?") + "]: " + auth.error.message + " | details=" + JSON.stringify(auth.error.details ?? {}) + " | tokenLen=" + token.length);
     const balance = parseFloat(auth.authorize.balance);
     const currency = auth.authorize.currency || "USD";
     const loginid = auth.authorize.loginid || null;
