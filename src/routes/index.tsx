@@ -253,7 +253,8 @@ function Dashboard() {
               <AreaChart data={equitySeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.42 0.13 160)" stopOpacity={0.18} />
+                    <stop offset="0%" stopColor="oklch(0.42 0.13 160)" stopOpacity={0.45} />
+                    <stop offset="50%" stopColor="oklch(0.72 0.14 75)" stopOpacity={0.18} />
                     <stop offset="100%" stopColor="oklch(0.42 0.13 160)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
@@ -261,11 +262,11 @@ function Dashboard() {
                 <XAxis dataKey="label" stroke="oklch(0.45 0.04 130)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="oklch(0.45 0.04 130)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.985 0.012 85)", border: "1px solid oklch(0.82 0.04 85)", borderRadius: 6, fontSize: 12 }}
+                  contentStyle={{ background: "oklch(0.985 0.012 85)", border: "1px solid oklch(0.72 0.14 75)", borderRadius: 6, fontSize: 12 }}
                   labelStyle={{ color: "oklch(0.45 0.04 130)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.15em" }}
                   formatter={(v: number) => fmtUSD(v)}
                 />
-                <Area type="monotone" dataKey="equity" stroke="oklch(0.42 0.13 160)" strokeWidth={1.5} fill="url(#eq)" />
+                <Area type="monotone" dataKey="equity" stroke="oklch(0.42 0.13 160)" strokeWidth={2} fill="url(#eq)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
