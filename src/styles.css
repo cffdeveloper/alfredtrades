@@ -4,28 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
- */
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -45,7 +29,6 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -63,96 +46,107 @@
   --color-warning: var(--warning);
   --color-gold: var(--gold);
   --color-burgundy: var(--burgundy);
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --font-display: 'Playfair Display', 'Fraunces', 'Times New Roman', serif;
-  --font-serif: 'Cormorant Garamond', 'Fraunces', serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+  --font-serif: 'IBM Plex Serif', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.5rem;
-  /* Maverick — illuminated manuscript, parchment + emerald + gold */
-  --background: oklch(0.965 0.018 85);               /* warm cream parchment */
-  --foreground: oklch(0.22 0.04 160);                /* deep forest ink */
-  --card: oklch(0.985 0.012 85);                     /* lighter parchment */
-  --card-foreground: oklch(0.22 0.04 160);
-  --popover: oklch(0.985 0.012 85);
-  --popover-foreground: oklch(0.22 0.04 160);
-  --primary: oklch(0.42 0.13 160);                   /* rich emerald */
-  --primary-foreground: oklch(0.97 0.02 85);
-  --primary-glow: oklch(0.55 0.16 160);
-  --secondary: oklch(0.93 0.025 85);                 /* warm beige */
-  --secondary-foreground: oklch(0.22 0.04 160);
-  --muted: oklch(0.92 0.022 85);
-  --muted-foreground: oklch(0.45 0.04 130);          /* sage grey-green */
-  --accent: oklch(0.72 0.14 75);                     /* antique gold */
-  --accent-foreground: oklch(0.18 0.04 160);
-  --destructive: oklch(0.45 0.18 25);                /* deep burgundy */
-  --destructive-foreground: oklch(0.97 0.02 85);
-  --success: oklch(0.50 0.15 155);                   /* emerald */
-  --warning: oklch(0.68 0.16 65);                    /* burnished gold */
-  --gold: oklch(0.72 0.14 75);                       /* antique gold accent */
-  --burgundy: oklch(0.40 0.16 20);                   /* deep burgundy */
-  --border: oklch(0.82 0.04 85);                     /* warm beige border */
-  --input: oklch(0.90 0.025 85);
-  --ring: oklch(0.42 0.13 160);
-  --chart-1: oklch(0.42 0.13 160);                   /* emerald */
-  --chart-2: oklch(0.72 0.14 75);                    /* gold */
-  --chart-3: oklch(0.45 0.18 25);                    /* burgundy */
-  --chart-4: oklch(0.55 0.13 220);                   /* deep teal-blue */
-  --chart-5: oklch(0.60 0.16 295);                   /* aubergine */
-  --gradient-primary: linear-gradient(135deg, oklch(0.42 0.13 160), oklch(0.55 0.16 160));
-  --gradient-gold: linear-gradient(135deg, oklch(0.72 0.14 75), oklch(0.82 0.12 80));
-  --gradient-card: linear-gradient(180deg, oklch(0.985 0.012 85), oklch(0.96 0.018 85));
-  --shadow-glow: 0 4px 16px -2px oklch(0.42 0.13 160 / 0.18);
-  --shadow-card: 0 1px 3px 0 oklch(0.30 0.05 85 / 0.08), 0 1px 2px 0 oklch(0.30 0.05 85 / 0.04);
-  --sidebar: oklch(0.985 0.012 85);
-  --sidebar-foreground: oklch(0.22 0.04 160);
-  --sidebar-primary: oklch(0.42 0.13 160);
-  --sidebar-primary-foreground: oklch(0.97 0.02 85);
-  --sidebar-accent: oklch(0.93 0.025 85);
-  --sidebar-accent-foreground: oklch(0.22 0.04 160);
-  --sidebar-border: oklch(0.82 0.04 85);
-  --sidebar-ring: oklch(0.28 0.06 255);
+  --radius: 0.375rem;
+
+  /* Maverick — Bloomberg terminal: midnight navy, amber, electric cyan, neon green */
+  --background: oklch(0.16 0.025 250);                 /* deep midnight navy */
+  --foreground: oklch(0.94 0.012 95);                  /* warm bone */
+  --card: oklch(0.20 0.028 250);                       /* slightly lighter panel */
+  --card-foreground: oklch(0.94 0.012 95);
+  --popover: oklch(0.20 0.028 250);
+  --popover-foreground: oklch(0.94 0.012 95);
+
+  --primary: oklch(0.78 0.16 75);                      /* terminal amber */
+  --primary-foreground: oklch(0.14 0.02 250);
+  --primary-glow: oklch(0.85 0.17 80);
+
+  --secondary: oklch(0.26 0.03 250);
+  --secondary-foreground: oklch(0.94 0.012 95);
+
+  --muted: oklch(0.24 0.025 250);
+  --muted-foreground: oklch(0.62 0.025 220);            /* slate */
+
+  --accent: oklch(0.72 0.18 200);                      /* electric cyan */
+  --accent-foreground: oklch(0.14 0.02 250);
+
+  --destructive: oklch(0.62 0.22 25);                  /* hot red */
+  --destructive-foreground: oklch(0.97 0.01 95);
+
+  --success: oklch(0.74 0.21 145);                     /* terminal green */
+  --warning: oklch(0.78 0.16 75);
+  --gold: oklch(0.78 0.16 75);                         /* alias amber */
+  --burgundy: oklch(0.55 0.20 20);
+
+  --border: oklch(0.30 0.03 245);
+  --input: oklch(0.26 0.028 250);
+  --ring: oklch(0.78 0.16 75);
+
+  --chart-1: oklch(0.78 0.16 75);                      /* amber */
+  --chart-2: oklch(0.74 0.21 145);                     /* green */
+  --chart-3: oklch(0.62 0.22 25);                      /* red */
+  --chart-4: oklch(0.72 0.18 200);                     /* cyan */
+  --chart-5: oklch(0.70 0.18 295);                     /* magenta-violet */
+
+  --gradient-primary: linear-gradient(135deg, oklch(0.78 0.16 75), oklch(0.85 0.17 80));
+  --gradient-gold: linear-gradient(135deg, oklch(0.78 0.16 75), oklch(0.88 0.14 85));
+  --gradient-card: linear-gradient(180deg, oklch(0.21 0.03 250), oklch(0.18 0.026 250));
+  --shadow-glow: 0 0 24px -6px oklch(0.78 0.16 75 / 0.35);
+  --shadow-card: 0 1px 0 0 oklch(0.40 0.04 245 / 0.4) inset, 0 4px 12px -4px oklch(0 0 0 / 0.5);
+
+  --sidebar: oklch(0.18 0.026 250);
+  --sidebar-foreground: oklch(0.94 0.012 95);
+  --sidebar-primary: oklch(0.78 0.16 75);
+  --sidebar-primary-foreground: oklch(0.14 0.02 250);
+  --sidebar-accent: oklch(0.24 0.028 250);
+  --sidebar-accent-foreground: oklch(0.94 0.012 95);
+  --sidebar-border: oklch(0.30 0.03 245);
+  --sidebar-ring: oklch(0.78 0.16 75);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --background: oklch(0.14 0.022 250);
+  --foreground: oklch(0.94 0.012 95);
+  --card: oklch(0.18 0.026 250);
+  --card-foreground: oklch(0.94 0.012 95);
+  --popover: oklch(0.18 0.026 250);
+  --popover-foreground: oklch(0.94 0.012 95);
+  --primary: oklch(0.78 0.16 75);
+  --primary-foreground: oklch(0.14 0.02 250);
+  --secondary: oklch(0.24 0.028 250);
+  --secondary-foreground: oklch(0.94 0.012 95);
+  --muted: oklch(0.22 0.025 250);
+  --muted-foreground: oklch(0.62 0.025 220);
+  --accent: oklch(0.72 0.18 200);
+  --accent-foreground: oklch(0.14 0.02 250);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.97 0.01 95);
+  --border: oklch(0.28 0.03 245);
+  --input: oklch(0.24 0.028 250);
+  --ring: oklch(0.78 0.16 75);
+  --chart-1: oklch(0.78 0.16 75);
+  --chart-2: oklch(0.74 0.21 145);
+  --chart-3: oklch(0.62 0.22 25);
+  --chart-4: oklch(0.72 0.18 200);
+  --chart-5: oklch(0.70 0.18 295);
+  --sidebar: oklch(0.16 0.024 250);
+  --sidebar-foreground: oklch(0.94 0.012 95);
+  --sidebar-primary: oklch(0.78 0.16 75);
+  --sidebar-primary-foreground: oklch(0.14 0.02 250);
+  --sidebar-accent: oklch(0.22 0.025 250);
+  --sidebar-accent-foreground: oklch(0.94 0.012 95);
+  --sidebar-border: oklch(0.28 0.03 245);
+  --sidebar-ring: oklch(0.78 0.16 75);
 }
 
 @layer base {
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 
   * {
     border-color: var(--color-border);
@@ -162,128 +156,144 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
+    font-size: 14px; /* tighter base — terminal feel */
   }
 
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-sans);
-    /* Rich layered vignette: emerald + gold pools on warm parchment */
+    font-family: var(--font-mono);
+    font-feature-settings: "ss01", "ss02", "tnum", "lnum";
     background-image:
-      radial-gradient(at 0% 0%, color-mix(in oklab, var(--primary) 12%, transparent) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, color-mix(in oklab, var(--gold) 14%, transparent) 0px, transparent 45%),
-      radial-gradient(at 50% 100%, color-mix(in oklab, var(--burgundy) 10%, transparent) 0px, transparent 55%),
-      radial-gradient(at 100% 100%, color-mix(in oklab, var(--primary) 10%, transparent) 0px, transparent 50%);
+      /* subtle scanline */
+      repeating-linear-gradient(
+        180deg,
+        transparent 0,
+        transparent 3px,
+        oklch(1 0 0 / 0.012) 3px,
+        oklch(1 0 0 / 0.012) 4px
+      ),
+      /* amber pool top-left */
+      radial-gradient(at 0% 0%, color-mix(in oklab, var(--primary) 18%, transparent) 0px, transparent 50%),
+      /* cyan pool top-right */
+      radial-gradient(at 100% 0%, color-mix(in oklab, var(--accent) 14%, transparent) 0px, transparent 45%),
+      /* green pool bottom */
+      radial-gradient(at 50% 100%, color-mix(in oklab, var(--success) 10%, transparent) 0px, transparent 55%);
     background-attachment: fixed;
     position: relative;
+    letter-spacing: 0.005em;
   }
 
   #root, main, header { position: relative; z-index: 1; }
 
   .font-mono { font-family: var(--font-mono); }
-  .font-display { font-family: var(--font-display); font-feature-settings: "ss01", "ss02", "lnum"; }
+  .font-display { font-family: var(--font-display); font-feature-settings: "ss01", "ss02", "tnum", "lnum"; letter-spacing: -0.01em; }
   .font-serif { font-family: var(--font-serif); }
+  .font-sans { font-family: var(--font-sans); }
 }
 
-/* ---- Decorative utilities (the "blueprint" feel, financial restraint) ---- */
+/* ---- Terminal-style decorative utilities ---- */
 
-/* Faint draftsman's grid — the single decorative texture. Use behind hero/header. */
+/* Faint terminal grid */
 .blueprint-grid {
   background-image:
-    linear-gradient(color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--primary) 6%, transparent) 1px, transparent 1px);
-  background-size: 32px 32px;
+    linear-gradient(color-mix(in oklab, var(--primary) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--primary) 9%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
-/* Dot grid — even more restrained alternative */
 .dot-grid {
-  background-image: radial-gradient(color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-image: radial-gradient(color-mix(in oklab, var(--primary) 18%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
 }
 
-/* Fading underline under a hero word */
+/* CRT scanline overlay */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(180deg, transparent 0, transparent 2px, oklch(1 0 0 / 0.025) 2px, oklch(1 0 0 / 0.025) 3px);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
 .ink-underline {
   background-image: linear-gradient(90deg, var(--primary) 0%, color-mix(in oklab, var(--primary) 0%, transparent) 100%);
   background-repeat: no-repeat;
   background-position: 0 100%;
-  background-size: 100% 2px;
+  background-size: 100% 1.5px;
   padding-bottom: 2px;
 }
 
-/* Uppercase tracked-out eyebrow — section label */
+/* Uppercase tracked-out eyebrow — terminal label */
 .eyebrow {
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   color: var(--primary);
 }
 
-/* Gold serif numeral that decorates a card corner */
+/* Faint mono numeral that decorates a card corner */
 .ornament-numeral {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-style: italic;
-  font-feature-settings: "lnum";
-  background: linear-gradient(135deg, var(--gold), color-mix(in oklab, var(--gold) 60%, var(--primary) 40%));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  opacity: 0.5;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-feature-settings: "tnum", "lnum";
+  color: var(--primary);
+  opacity: 0.18;
   line-height: 1;
   pointer-events: none;
   user-select: none;
+  letter-spacing: -0.04em;
 }
 
-/* Hide scrollbars but keep scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
 @keyframes ticker {
-  0% { opacity: 0.35; }
-  50% { opacity: 1; }
-  100% { opacity: 0.35; }
+  0% { opacity: 0.35; box-shadow: 0 0 0 0 currentColor; }
+  50% { opacity: 1; box-shadow: 0 0 6px 1px currentColor; }
+  100% { opacity: 0.35; box-shadow: 0 0 0 0 currentColor; }
 }
-
 .live-dot { animation: ticker 1.6s ease-in-out infinite; }
 
-/* No-op: kept so callers don't break */
 .glow-ring { }
 .shimmer-line { display: none; }
 
-/* Gold-leaf hairline corner accents */
-.tech-card { position: relative; }
+/* Terminal corner brackets — amber hairlines */
+.tech-card { position: relative; background-image: var(--gradient-card); }
 .tech-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
-  width: 14px; height: 14px;
-  border-top: 1.5px solid var(--gold);
-  border-left: 1.5px solid var(--gold);
+  width: 12px; height: 12px;
+  border-top: 1px solid var(--primary);
+  border-left: 1px solid var(--primary);
   pointer-events: none;
-  opacity: 0.7;
+  opacity: 0.85;
 }
 .tech-card::after {
   content: '';
   position: absolute;
   bottom: 0; right: 0;
-  width: 14px; height: 14px;
-  border-bottom: 1.5px solid var(--gold);
-  border-right: 1.5px solid var(--gold);
+  width: 12px; height: 12px;
+  border-bottom: 1px solid var(--primary);
+  border-right: 1px solid var(--primary);
   pointer-events: none;
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
-/* Mobile-first font shrinking for dashboard. */
+/* Tighter mobile scaling — terminal screens look better dense */
 @media (max-width: 640px) {
+  html { font-size: 13px; }
   section h2.font-display {
-    font-size: 1.125rem !important; /* 18px */
+    font-size: 1rem !important;
     line-height: 1.2;
   }
-  section .eyebrow { font-size: 9px; letter-spacing: 0.18em; }
-  .tech-card { padding: 1rem !important; }
-  table.font-mono { font-size: 11px; }
+  section .eyebrow { font-size: 9px; letter-spacing: 0.16em; }
+  .tech-card { padding: 0.875rem !important; }
+  table.font-mono { font-size: 10.5px; }
   table.font-mono th, table.font-mono td {
     padding-left: 0.25rem;
     padding-right: 0.25rem;
