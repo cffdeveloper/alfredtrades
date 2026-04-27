@@ -63,10 +63,10 @@
   --color-warning: var(--warning);
   --color-gold: var(--gold);
   --color-burgundy: var(--burgundy);
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --font-display: 'Playfair Display', 'Fraunces', 'Times New Roman', serif;
-  --font-serif: 'Cormorant Garamond', 'Fraunces', serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-serif: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-sans: 'IBM Plex Sans', 'Inter', system-ui, sans-serif;
 }
 
 :root {
