@@ -225,17 +225,17 @@
   color: var(--primary);
 }
 
-/* Gold serif numeral that decorates a card corner */
+/* Mono numeral that decorates a card corner */
 .ornament-numeral {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-style: italic;
-  font-feature-settings: "lnum";
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-feature-settings: "tnum";
+  letter-spacing: -0.04em;
   background: linear-gradient(135deg, var(--gold), color-mix(in oklab, var(--gold) 60%, var(--primary) 40%));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  opacity: 0.5;
+  opacity: 0.45;
   line-height: 1;
   pointer-events: none;
   user-select: none;
