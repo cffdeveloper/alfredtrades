@@ -161,6 +161,183 @@ export type Database = {
         }
         Relationships: []
       }
+      deriv_balance: {
+        Row: {
+          balance: number
+          created_at: string
+          currency: string
+          id: string
+          loginid: string | null
+        }
+        Insert: {
+          balance: number
+          created_at?: string
+          currency?: string
+          id?: string
+          loginid?: string | null
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          loginid?: string | null
+        }
+        Relationships: []
+      }
+      deriv_runs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          id: string
+          message: string | null
+          signals_generated: number | null
+          status: string
+          ticks_collected: number | null
+          trades_executed: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          message?: string | null
+          signals_generated?: number | null
+          status: string
+          ticks_collected?: number | null
+          trades_executed?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          message?: string | null
+          signals_generated?: number | null
+          status?: string
+          ticks_collected?: number | null
+          trades_executed?: number | null
+        }
+        Relationships: []
+      }
+      deriv_signals: {
+        Row: {
+          acted: boolean
+          confidence: number | null
+          contract_type: string | null
+          created_at: string
+          digit: number | null
+          entropy: number | null
+          id: string
+          reasoning: string | null
+          symbol: string
+        }
+        Insert: {
+          acted?: boolean
+          confidence?: number | null
+          contract_type?: string | null
+          created_at?: string
+          digit?: number | null
+          entropy?: number | null
+          id?: string
+          reasoning?: string | null
+          symbol: string
+        }
+        Update: {
+          acted?: boolean
+          confidence?: number | null
+          contract_type?: string | null
+          created_at?: string
+          digit?: number | null
+          entropy?: number | null
+          id?: string
+          reasoning?: string | null
+          symbol?: string
+        }
+        Relationships: []
+      }
+      deriv_ticks: {
+        Row: {
+          created_at: string
+          epoch: number
+          id: string
+          last_digit: number
+          quote: number
+          symbol: string
+        }
+        Insert: {
+          created_at?: string
+          epoch: number
+          id?: string
+          last_digit: number
+          quote: number
+          symbol: string
+        }
+        Update: {
+          created_at?: string
+          epoch?: number
+          id?: string
+          last_digit?: number
+          quote?: number
+          symbol?: string
+        }
+        Relationships: []
+      }
+      deriv_trades: {
+        Row: {
+          confidence: number | null
+          contract_id: string | null
+          contract_type: string
+          created_at: string
+          digit: number
+          entry_quote: number | null
+          exit_quote: number | null
+          id: string
+          payout: number | null
+          pnl: number | null
+          reasoning: string | null
+          settled_at: string | null
+          stake: number
+          status: string
+          symbol: string
+          won: boolean | null
+        }
+        Insert: {
+          confidence?: number | null
+          contract_id?: string | null
+          contract_type: string
+          created_at?: string
+          digit: number
+          entry_quote?: number | null
+          exit_quote?: number | null
+          id?: string
+          payout?: number | null
+          pnl?: number | null
+          reasoning?: string | null
+          settled_at?: string | null
+          stake: number
+          status?: string
+          symbol: string
+          won?: boolean | null
+        }
+        Update: {
+          confidence?: number | null
+          contract_id?: string | null
+          contract_type?: string
+          created_at?: string
+          digit?: number
+          entry_quote?: number | null
+          exit_quote?: number | null
+          id?: string
+          payout?: number | null
+          pnl?: number | null
+          reasoning?: string | null
+          settled_at?: string | null
+          stake?: number
+          status?: string
+          symbol?: string
+          won?: boolean | null
+        }
+        Relationships: []
+      }
       portfolio_snapshots: {
         Row: {
           buying_power: number

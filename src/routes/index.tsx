@@ -17,6 +17,8 @@ import {
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
 } from "recharts";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { DerivPanel } from "@/components/dashboard/DerivPanel";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -206,6 +208,13 @@ function Dashboard() {
       </header>
 
       <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14 space-y-8 sm:space-y-12">
+        <Tabs defaultValue="alpaca" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="alpaca">Alpaca</TabsTrigger>
+            <TabsTrigger value="deriv">Deriv</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="alpaca" className="space-y-8 sm:space-y-12">
         {/* Thesis line — italic serif, the page's voice */}
         <section className="max-w-3xl">
           <p className="eyebrow mb-2 sm:mb-3 !text-[var(--gold)]">— The Thesis —</p>
@@ -556,6 +565,12 @@ function Dashboard() {
             Maverick Bot v2 · Multi-Strategy · Paper Trading · Auto-refresh 30s
           </p>
         </footer>
+          </TabsContent>
+
+          <TabsContent value="deriv">
+            <DerivPanel />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
