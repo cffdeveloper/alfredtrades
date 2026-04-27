@@ -33,6 +33,8 @@ interface Snapshot { id: string; equity: number; cash: number; portfolio_value: 
 interface Signal { id: string; symbol: string; signal: string; price: number; reason: string | null; rsi: number | null; strategy: string | null; confidence: number | null; regime: string | null; zscore: number | null; created_at: string }
 interface Trade { id: string; symbol: string; side: string; qty: number; price: number; value: number; strategy: string | null; confidence: number | null; stop_price: number | null; target_price: number | null; created_at: string }
 interface Run { id: string; status: string; trades_executed: number; signals_generated: number; market_open: boolean | null; duration_ms: number | null; created_at: string; message: string | null; daily_pl: number | null; halt_entries: boolean | null; regime_summary: Record<string, { regime: string; conf: number }> | null }
+interface TradeReview { id: string; symbol: string; pnl: number; pnl_pct: number; hold_seconds: number | null; exit_reason: string | null; regime: string | null; ai_verdict: string | null; ai_lesson: string | null; ai_weight_adjustments: Array<{ signal_name: string; regime: string; delta: number }> | null; created_at: string }
+interface SignalWeight { id: string; signal_name: string; regime: string; weight: number; wins: number; losses: number; updated_at: string }
 
 const REGIME_COLORS: Record<string, string> = {
   TRENDING_UP: "text-success border-success/40 bg-success/10",
