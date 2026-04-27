@@ -191,10 +191,18 @@ function openWS(token: string): Promise<{
 // ─── Main cycle ──────────────────────────────────────────────────────────
 async function runCycle() {
   const t0 = Date.now();
-  const token = Deno.env.get("DERIV_API_TOKEN");
+  const rawToken = Deno.env.get("DERIV_API_TOKEN") ?? "";
+  const token = rawToken.trim().replace(/[\r\n\t ]+/g, "");
+  console.log(`[deriv-master] token len=${token.length} raw_len=${rawToken.length} first3=${token.slice(0,3)} last3=${token.slice(-3)}`);
   if (!token) {
     await supabase.from("dm_runs").insert({ status: "error", message: "Missing DERIV_API_TOKEN" });
     return { ok: false, error: "missing token" };
+  }
+  if (!/^[\w\-]{1,128}$/.test(token)) {
+    const msg = `Token failed format check (len=${token.length}). Deriv requires ^[\\w\\-]{1,128}$ — likely whitespace/special chars in secret value.`;
+    console.log(`[deriv-master] ${msg}`);
+    await supabase.from("dm_runs").insert({ status: "error", message: msg });
+    return { ok: false, error: msg };
   }
 
   let session: Awaited<ReturnType<typeof openWS>> | null = null;
