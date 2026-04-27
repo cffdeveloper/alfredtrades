@@ -22,8 +22,10 @@ const MAX_HISTORY = 400;
 const BASE_STAKE = 0.35;
 const MAX_STAKE = 2.50;
 const KELLY_FRACTION = 0.25;
-const MIN_EV = 0.02;             // require ≥2% edge
-const MIN_STAT_CONF = 0.40;
+const MIN_EV = 0.05;             // require ≥5% edge after blending
+const MIN_STAT_CONF = 0.65;      // require strong statistical signal
+const MIN_HISTORY = 150;         // need ≥150 ticks before trusting stats
+const STAT_WEIGHT_CAP = 0.20;    // never weight statistical model > 20%
 const MAX_DRAWDOWN_PCT = 25;     // halt if balance falls 25% from peak
 const MAX_DAILY_LOSS_PCT = 10;
 const MAX_CONSEC_LOSSES = 5;
@@ -191,10 +193,18 @@ function openWS(token: string): Promise<{
 // ─── Main cycle ──────────────────────────────────────────────────────────
 async function runCycle() {
   const t0 = Date.now();
-  const token = Deno.env.get("DERIV_API_TOKEN");
+  const rawToken = Deno.env.get("DERIV_API_TOKEN") ?? "";
+  const token = rawToken.trim().replace(/[\r\n\t ]+/g, "");
+  console.log(`[deriv-master] token len=${token.length} raw_len=${rawToken.length} first3=${token.slice(0,3)} last3=${token.slice(-3)}`);
   if (!token) {
     await supabase.from("dm_runs").insert({ status: "error", message: "Missing DERIV_API_TOKEN" });
     return { ok: false, error: "missing token" };
+  }
+  if (!/^[\w\-]{1,128}$/.test(token)) {
+    const msg = `Token failed format check (len=${token.length}). Deriv requires ^[\\w\\-]{1,128}$ — likely whitespace/special chars in secret value.`;
+    console.log(`[deriv-master] ${msg}`);
+    await supabase.from("dm_runs").insert({ status: "error", message: msg });
+    return { ok: false, error: msg };
   }
 
   let session: Awaited<ReturnType<typeof openWS>> | null = null;
@@ -285,6 +295,7 @@ async function runCycle() {
     const combos: Combo[] = [];
     for (const sym of SYMBOLS) {
       const { probs, conf } = compositeProbs(histories[sym]);
+      if (histories[sym].length < MIN_HISTORY) continue;
       if (conf < MIN_STAT_CONF) continue;
       // For each contract type, pick the most promising barrier(s)
       const types: Array<{ ct: string; barriers: (number | null)[] }> = [
@@ -327,9 +338,11 @@ async function runCycle() {
         const ask = parseFloat(msg.proposal.ask_price ?? msg.proposal.display_value ?? "0");
         const payout = parseFloat(msg.proposal.payout ?? "0");
         if (ask > 0 && payout > 0) {
-          const payoutRatio = (payout - ask) / ask; // profit per $1 stake
+          // Deriv `payout` = total return (stake + profit). Profit per $1 stake = (payout - ask)/ask, but never > 1 for digit contracts.
+          const payoutRatio = Math.max(0, (payout - ask) / ask);
+          if (payoutRatio > 20) continue; // sanity guard against malformed proposal
           // Use *blended* prob: weighted average of theoretical + statistical
-          const w = Math.min(0.5, p.combo.statConf);
+          const w = Math.min(STAT_WEIGHT_CAP, p.combo.statConf);
           const pBlend = p.combo.theoP * (1 - w) + p.combo.statP * w;
           const ev = pBlend * payoutRatio - (1 - pBlend);
           results.push({
@@ -370,7 +383,7 @@ async function runCycle() {
     const best = results[0];
     if (best && best.ev >= MIN_EV) {
       const stake = kellyStake(
-        best.combo.theoP * (1 - Math.min(0.5, best.combo.statConf)) + best.combo.statP * Math.min(0.5, best.combo.statConf),
+        best.combo.theoP * (1 - Math.min(STAT_WEIGHT_CAP, best.combo.statConf)) + best.combo.statP * Math.min(STAT_WEIGHT_CAP, best.combo.statConf),
         best.payoutRatio, balance,
       );
       // New proposal at adjusted stake (for accurate buy)
