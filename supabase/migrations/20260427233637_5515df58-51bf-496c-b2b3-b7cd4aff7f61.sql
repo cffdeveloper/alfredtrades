@@ -1,0 +1,1 @@
+UPDATE public.dm_state SET cooldown_until = NULL, consec_losses = 0, session_start_balance = NULL, peak_balance = NULL, updated_at = now() WHERE id = 1;
