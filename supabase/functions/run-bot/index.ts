@@ -323,6 +323,43 @@ function stratORB(symbol: string, currentPrice: number, bars5m: Bar[]): StratRes
   return { signal: "HOLD", confidence: 0, reason: `ORB waiting: $${currentPrice.toFixed(2)} vs high $${high.toFixed(2)}`, strategy: "ORB" };
 }
 
+// Map internal strategy names → AI-tracked signal names in `signal_weights`
+const STRATEGY_TO_SIGNAL: Record<string, string> = {
+  VWAP_ZScore: "zscore_mean_revert",
+  Momentum: "trend_follow",
+  ORB: "macd_cross",
+};
+
+type WeightMap = Record<string, number>; // key: `${signal_name}|${regime}` → weight
+let WEIGHTS_CACHE: { map: WeightMap; ts: number } | null = null;
+const WEIGHTS_TTL_MS = 60_000;
+
+async function loadWeights(): Promise<WeightMap> {
+  if (WEIGHTS_CACHE && Date.now() - WEIGHTS_CACHE.ts < WEIGHTS_TTL_MS) return WEIGHTS_CACHE.map;
+  const { data } = await supabase.from("signal_weights").select("signal_name, regime, weight");
+  const map: WeightMap = {};
+  for (const row of data ?? []) {
+    map[`${row.signal_name}|${row.regime}`] = Number(row.weight);
+  }
+  WEIGHTS_CACHE = { map, ts: Date.now() };
+  return map;
+}
+
+function weightFor(weights: WeightMap, strategy: string, regime: Regime): number {
+  const sig = STRATEGY_TO_SIGNAL[strategy];
+  if (!sig) return 1.0;
+  const regimeKey = regime === "TRENDING_UP" || regime === "TRENDING_DOWN" ? "trending"
+    : regime === "RANGING" ? "ranging"
+    : regime === "VOLATILE" ? "volatile" : "all";
+  return weights[`${sig}|${regimeKey}`] ?? weights[`${sig}|all`] ?? 1.0;
+}
+
+function applyWeight(s: StratResult, w: number): StratResult {
+  if (w === 1.0 || s.confidence === 0) return s;
+  const adjusted = Math.max(0, Math.min(99, Math.round(s.confidence * w)));
+  return { ...s, confidence: adjusted, reason: `${s.reason} [w×${w.toFixed(2)}]` };
+}
+
 function combine(signals: StratResult[]): StratResult {
   const buys = signals.filter(s => (s.signal === "BUY" || s.signal === "STRONG_BUY") && s.confidence > 0);
   const sells = signals.filter(s => s.signal === "SELL" || s.signal === "STRONG_SELL");
