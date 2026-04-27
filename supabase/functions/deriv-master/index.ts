@@ -341,7 +341,7 @@ async function runCycle() {
           const payoutRatio = Math.max(0, (payout - ask) / ask);
           if (payoutRatio > 20) continue; // sanity guard against malformed proposal
           // Use *blended* prob: weighted average of theoretical + statistical
-          const w = Math.min(0.5, p.combo.statConf);
+          const w = Math.min(STAT_WEIGHT_CAP, p.combo.statConf);
           const pBlend = p.combo.theoP * (1 - w) + p.combo.statP * w;
           const ev = pBlend * payoutRatio - (1 - pBlend);
           results.push({
@@ -382,7 +382,7 @@ async function runCycle() {
     const best = results[0];
     if (best && best.ev >= MIN_EV) {
       const stake = kellyStake(
-        best.combo.theoP * (1 - Math.min(0.5, best.combo.statConf)) + best.combo.statP * Math.min(0.5, best.combo.statConf),
+        best.combo.theoP * (1 - Math.min(STAT_WEIGHT_CAP, best.combo.statConf)) + best.combo.statP * Math.min(STAT_WEIGHT_CAP, best.combo.statConf),
         best.payoutRatio, balance,
       );
       // New proposal at adjusted stake (for accurate buy)
