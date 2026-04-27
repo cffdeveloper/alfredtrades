@@ -252,25 +252,27 @@
 .glow-ring { }
 .shimmer-line { display: none; }
 
-/* Subtle hairline corner accents — the only "tech" decoration we keep */
+/* Gold-leaf hairline corner accents */
 .tech-card { position: relative; }
 .tech-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
-  width: 10px; height: 10px;
-  border-top: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
-  border-left: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
+  width: 14px; height: 14px;
+  border-top: 1.5px solid var(--gold);
+  border-left: 1.5px solid var(--gold);
   pointer-events: none;
+  opacity: 0.7;
 }
 .tech-card::after {
   content: '';
   position: absolute;
   bottom: 0; right: 0;
-  width: 10px; height: 10px;
-  border-bottom: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
-  border-right: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
+  width: 14px; height: 14px;
+  border-bottom: 1.5px solid var(--gold);
+  border-right: 1.5px solid var(--gold);
   pointer-events: none;
+  opacity: 0.7;
 }
 
 /* Mobile-first font shrinking for dashboard. */
