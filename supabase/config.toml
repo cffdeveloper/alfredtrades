@@ -1,2 +1,5 @@
 [functions.run-bot]
 verify_jwt = false
+
+[functions.review-trade]
+verify_jwt = false

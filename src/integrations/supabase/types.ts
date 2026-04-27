@@ -194,6 +194,99 @@ export type Database = {
         }
         Relationships: []
       }
+      signal_weights: {
+        Row: {
+          id: string
+          losses: number
+          regime: string
+          signal_name: string
+          updated_at: string
+          weight: number
+          wins: number
+        }
+        Insert: {
+          id?: string
+          losses?: number
+          regime?: string
+          signal_name: string
+          updated_at?: string
+          weight?: number
+          wins?: number
+        }
+        Update: {
+          id?: string
+          losses?: number
+          regime?: string
+          signal_name?: string
+          updated_at?: string
+          weight?: number
+          wins?: number
+        }
+        Relationships: []
+      }
+      trade_reviews: {
+        Row: {
+          ai_lesson: string | null
+          ai_verdict: string | null
+          ai_weight_adjustments: Json | null
+          created_at: string
+          entry_price: number
+          entry_signals: Json | null
+          entry_trade_id: string | null
+          exit_price: number
+          exit_reason: string | null
+          exit_trade_id: string | null
+          hold_seconds: number | null
+          id: string
+          model: string | null
+          pnl: number
+          pnl_pct: number
+          qty: number
+          regime: string | null
+          symbol: string
+        }
+        Insert: {
+          ai_lesson?: string | null
+          ai_verdict?: string | null
+          ai_weight_adjustments?: Json | null
+          created_at?: string
+          entry_price: number
+          entry_signals?: Json | null
+          entry_trade_id?: string | null
+          exit_price: number
+          exit_reason?: string | null
+          exit_trade_id?: string | null
+          hold_seconds?: number | null
+          id?: string
+          model?: string | null
+          pnl: number
+          pnl_pct: number
+          qty: number
+          regime?: string | null
+          symbol: string
+        }
+        Update: {
+          ai_lesson?: string | null
+          ai_verdict?: string | null
+          ai_weight_adjustments?: Json | null
+          created_at?: string
+          entry_price?: number
+          entry_signals?: Json | null
+          entry_trade_id?: string | null
+          exit_price?: number
+          exit_reason?: string | null
+          exit_trade_id?: string | null
+          hold_seconds?: number | null
+          id?: string
+          model?: string | null
+          pnl?: number
+          pnl_pct?: number
+          qty?: number
+          regime?: string | null
+          symbol?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

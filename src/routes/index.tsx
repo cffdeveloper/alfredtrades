@@ -33,6 +33,8 @@ interface Snapshot { id: string; equity: number; cash: number; portfolio_value: 
 interface Signal { id: string; symbol: string; signal: string; price: number; reason: string | null; rsi: number | null; strategy: string | null; confidence: number | null; regime: string | null; zscore: number | null; created_at: string }
 interface Trade { id: string; symbol: string; side: string; qty: number; price: number; value: number; strategy: string | null; confidence: number | null; stop_price: number | null; target_price: number | null; created_at: string }
 interface Run { id: string; status: string; trades_executed: number; signals_generated: number; market_open: boolean | null; duration_ms: number | null; created_at: string; message: string | null; daily_pl: number | null; halt_entries: boolean | null; regime_summary: Record<string, { regime: string; conf: number }> | null }
+interface TradeReview { id: string; symbol: string; pnl: number; pnl_pct: number; hold_seconds: number | null; exit_reason: string | null; regime: string | null; ai_verdict: string | null; ai_lesson: string | null; ai_weight_adjustments: Array<{ signal_name: string; regime: string; delta: number }> | null; created_at: string }
+interface SignalWeight { id: string; signal_name: string; regime: string; weight: number; wins: number; losses: number; updated_at: string }
 
 const REGIME_COLORS: Record<string, string> = {
   TRENDING_UP: "text-success border-success/40 bg-success/10",
@@ -60,20 +62,26 @@ function Dashboard() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [trades, setTrades] = useState<Trade[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
+  const [reviews, setReviews] = useState<TradeReview[]>([]);
+  const [weights, setWeights] = useState<SignalWeight[]>([]);
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadAll = async () => {
-    const [snapRes, sigRes, trdRes, runRes] = await Promise.all([
+    const [snapRes, sigRes, trdRes, runRes, revRes, wRes] = await Promise.all([
       supabase.from("portfolio_snapshots").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("bot_signals").select("*").order("created_at", { ascending: false }).limit(80),
       supabase.from("bot_trades").select("*").order("created_at", { ascending: false }).limit(80),
       supabase.from("bot_runs").select("*").order("created_at", { ascending: false }).limit(20),
+      supabase.from("trade_reviews").select("*").order("created_at", { ascending: false }).limit(10),
+      supabase.from("signal_weights").select("*").order("weight", { ascending: false }),
     ]);
     if (snapRes.data) setSnapshots(snapRes.data as unknown as Snapshot[]);
     if (sigRes.data) setSignals(sigRes.data as unknown as Signal[]);
     if (trdRes.data) setTrades(trdRes.data as unknown as Trade[]);
     if (runRes.data) setRuns(runRes.data as unknown as Run[]);
+    if (revRes.data) setReviews(revRes.data as unknown as TradeReview[]);
+    if (wRes.data) setWeights(wRes.data as unknown as SignalWeight[]);
     setLoading(false);
   };
 
@@ -421,6 +429,82 @@ function Dashboard() {
                   <span className="font-mono text-[10px] text-muted-foreground whitespace-nowrap">{fmtTime(t.created_at)}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Bot Brain — AI learning loop */}
+        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="mb-6">
+            <p className="eyebrow flex items-center gap-2"><Brain className="h-3 w-3" /> Bot Brain</p>
+            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">AI trade reviews & adaptive weights</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">After every closed trade, AI reviews what worked and tunes signal weights for the next cycle.</p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Reviews */}
+            <div className="lg:col-span-2 space-y-3">
+              <p className="eyebrow text-[10px]">Latest reviews</p>
+              {reviews.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-6 text-center border border-dashed border-border rounded-lg">
+                  No closed round-trips yet. Reviews appear automatically when a position closes.
+                </p>
+              ) : (
+                reviews.map((r) => (
+                  <div key={r.id} className="border border-border rounded-lg p-4 bg-background/40">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm font-semibold">{r.symbol}</span>
+                        {r.regime && <span className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${REGIME_COLORS[r.regime] ?? REGIME_COLORS.UNKNOWN}`}>{r.regime}</span>}
+                        <span className="text-[10px] uppercase text-muted-foreground">{r.exit_reason}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className={`font-mono text-sm font-semibold ${r.pnl >= 0 ? "text-success" : "text-destructive"}`}>{fmtUSD(r.pnl)}</div>
+                        <div className={`font-mono text-[10px] ${r.pnl >= 0 ? "text-success" : "text-destructive"}`}>{r.pnl_pct >= 0 ? "+" : ""}{r.pnl_pct.toFixed(2)}%</div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-foreground/90 leading-snug">{r.ai_verdict}</p>
+                    {r.ai_lesson && <p className="text-xs text-muted-foreground italic mt-1.5">→ {r.ai_lesson}</p>}
+                    {r.ai_weight_adjustments && r.ai_weight_adjustments.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {r.ai_weight_adjustments.map((a, i) => (
+                          <span key={i} className={`font-mono text-[10px] px-1.5 py-0.5 rounded border ${a.delta >= 0 ? "border-success/40 text-success bg-success/5" : "border-destructive/40 text-destructive bg-destructive/5"}`}>
+                            {a.signal_name}/{a.regime} {a.delta >= 0 ? "+" : ""}{a.delta.toFixed(2)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-[10px] text-muted-foreground/70 mt-2 font-mono">{fmtTime(r.created_at)}</p>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Adaptive weights */}
+            <div>
+              <p className="eyebrow text-[10px] mb-3">Current signal weights</p>
+              <div className="space-y-2">
+                {weights.map((w) => {
+                  const total = w.wins + w.losses;
+                  const wr = total > 0 ? Math.round((w.wins / total) * 100) : null;
+                  const pct = Math.min(100, (w.weight / 2) * 100);
+                  return (
+                    <div key={w.id} className="border border-border rounded-md p-2.5 bg-background/40">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-mono text-xs">{w.signal_name}</span>
+                        <span className="font-mono text-xs tabular-nums font-semibold">{w.weight.toFixed(2)}×</span>
+                      </div>
+                      <div className="h-1 rounded-full bg-muted overflow-hidden mb-1">
+                        <div className={`h-full ${w.weight >= 1 ? "bg-success" : "bg-destructive"}`} style={{ width: `${pct}%` }} />
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
+                        <span>{w.regime}</span>
+                        <span>{total > 0 ? `${w.wins}W/${w.losses}L · ${wr}%` : "no data"}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>

@@ -380,6 +380,23 @@ async function getFillPrice(orderId: string, fallbackPrice: number): Promise<num
   return fallbackPrice;
 }
 
+// Fire-and-forget AI review of a closed trade. Does not block the cycle.
+async function fireReview(symbol: string, exitTradeId: string | undefined) {
+  if (!exitTradeId) return;
+  try {
+    fetch(`${SUPABASE_URL}/functions/v1/review-trade`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+      body: JSON.stringify({ symbol, exitTradeId }),
+    }).catch((e) => console.error("review-trade dispatch error", e));
+  } catch (e) {
+    console.error("fireReview error", e);
+  }
+}
+
 // ── Main cycle ───────────────────────────────────────────────────────────────
 async function runCycle() {
   const start = Date.now();
@@ -441,38 +458,41 @@ async function runCycle() {
           if (cur <= stop && marketOpen) {
             const order = await submitOrder(symbol, "sell", qty);
             const fill = await getFillPrice(order.id, cur);
-            await supabase.from("bot_trades").insert({
+            const { data: tr1 } = await supabase.from("bot_trades").insert({
               symbol, side: "sell", qty, price: fill, value: qty * fill,
               alpaca_order_id: order.id, strategy: "stop_loss",
               stop_price: stop, target_price: target, confidence: 100,
-            });
+            }).select("id").single();
             await supabase.from("bot_signals").insert({
               symbol, signal: "STOP-LOSS", price: fill, reason: `Stop $${stop.toFixed(2)} hit`,
               strategy: "RiskMgmt", confidence: 100, regime,
             });
             tradesExecuted++; openCount--;
+            fireReview(symbol, tr1?.id);
             continue;
           }
           if (cur >= target && marketOpen) {
             const order = await submitOrder(symbol, "sell", qty);
             const fill = await getFillPrice(order.id, cur);
-            await supabase.from("bot_trades").insert({
+            const { data: tr2 } = await supabase.from("bot_trades").insert({
               symbol, side: "sell", qty, price: fill, value: qty * fill,
               alpaca_order_id: order.id, strategy: "take_profit",
               stop_price: stop, target_price: target, confidence: 95,
-            });
+            }).select("id").single();
             tradesExecuted++; openCount--;
+            fireReview(symbol, tr2?.id);
             continue;
           }
           if ((best.signal === "SELL" || best.signal === "STRONG_SELL") && marketOpen) {
             const order = await submitOrder(symbol, "sell", qty);
             const fill = await getFillPrice(order.id, ind.price);
-            await supabase.from("bot_trades").insert({
+            const { data: tr3 } = await supabase.from("bot_trades").insert({
               symbol, side: "sell", qty, price: fill, value: qty * fill,
               alpaca_order_id: order.id, strategy: best.strategy,
               stop_price: stop, target_price: target, confidence: best.confidence,
-            });
+            }).select("id").single();
             tradesExecuted++; openCount--;
+            fireReview(symbol, tr3?.id);
           }
           continue;
         }
