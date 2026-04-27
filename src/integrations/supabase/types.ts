@@ -14,154 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      bot_runs: {
-        Row: {
-          created_at: string
-          daily_pl: number | null
-          duration_ms: number | null
-          halt_entries: boolean | null
-          id: string
-          market_open: boolean | null
-          message: string | null
-          regime_summary: Json | null
-          signals_generated: number | null
-          status: string
-          symbols_processed: number | null
-          trades_executed: number | null
-        }
-        Insert: {
-          created_at?: string
-          daily_pl?: number | null
-          duration_ms?: number | null
-          halt_entries?: boolean | null
-          id?: string
-          market_open?: boolean | null
-          message?: string | null
-          regime_summary?: Json | null
-          signals_generated?: number | null
-          status: string
-          symbols_processed?: number | null
-          trades_executed?: number | null
-        }
-        Update: {
-          created_at?: string
-          daily_pl?: number | null
-          duration_ms?: number | null
-          halt_entries?: boolean | null
-          id?: string
-          market_open?: boolean | null
-          message?: string | null
-          regime_summary?: Json | null
-          signals_generated?: number | null
-          status?: string
-          symbols_processed?: number | null
-          trades_executed?: number | null
-        }
-        Relationships: []
-      }
-      bot_signals: {
-        Row: {
-          adx: number | null
-          atr: number | null
-          confidence: number | null
-          created_at: string
-          id: string
-          price: number
-          reason: string | null
-          regime: string | null
-          rsi: number | null
-          signal: string
-          sma_fast: number | null
-          sma_slow: number | null
-          strategy: string | null
-          symbol: string
-          vwap: number | null
-          zscore: number | null
-        }
-        Insert: {
-          adx?: number | null
-          atr?: number | null
-          confidence?: number | null
-          created_at?: string
-          id?: string
-          price: number
-          reason?: string | null
-          regime?: string | null
-          rsi?: number | null
-          signal: string
-          sma_fast?: number | null
-          sma_slow?: number | null
-          strategy?: string | null
-          symbol: string
-          vwap?: number | null
-          zscore?: number | null
-        }
-        Update: {
-          adx?: number | null
-          atr?: number | null
-          confidence?: number | null
-          created_at?: string
-          id?: string
-          price?: number
-          reason?: string | null
-          regime?: string | null
-          rsi?: number | null
-          signal?: string
-          sma_fast?: number | null
-          sma_slow?: number | null
-          strategy?: string | null
-          symbol?: string
-          vwap?: number | null
-          zscore?: number | null
-        }
-        Relationships: []
-      }
-      bot_trades: {
-        Row: {
-          alpaca_order_id: string | null
-          confidence: number | null
-          created_at: string
-          id: string
-          price: number
-          qty: number
-          side: string
-          stop_price: number | null
-          strategy: string | null
-          symbol: string
-          target_price: number | null
-          value: number
-        }
-        Insert: {
-          alpaca_order_id?: string | null
-          confidence?: number | null
-          created_at?: string
-          id?: string
-          price: number
-          qty: number
-          side: string
-          stop_price?: number | null
-          strategy?: string | null
-          symbol: string
-          target_price?: number | null
-          value: number
-        }
-        Update: {
-          alpaca_order_id?: string | null
-          confidence?: number | null
-          created_at?: string
-          id?: string
-          price?: number
-          qty?: number
-          side?: string
-          stop_price?: number | null
-          strategy?: string | null
-          symbol?: string
-          target_price?: number | null
-          value?: number
-        }
-        Relationships: []
-      }
-      deriv_balance: {
+      dm_balance: {
         Row: {
           balance: number
           created_at: string
@@ -185,76 +38,126 @@ export type Database = {
         }
         Relationships: []
       }
-      deriv_runs: {
+      dm_candidates: {
         Row: {
+          barrier: number | null
+          contract_type: string
+          created_at: string
+          ev: number | null
+          id: string
+          payout_ratio: number | null
+          picked: boolean | null
+          run_id: string | null
+          stat_confidence: number | null
+          symbol: string
+          win_prob_statistical: number | null
+          win_prob_theoretical: number | null
+        }
+        Insert: {
+          barrier?: number | null
+          contract_type: string
+          created_at?: string
+          ev?: number | null
+          id?: string
+          payout_ratio?: number | null
+          picked?: boolean | null
+          run_id?: string | null
+          stat_confidence?: number | null
+          symbol: string
+          win_prob_statistical?: number | null
+          win_prob_theoretical?: number | null
+        }
+        Update: {
+          barrier?: number | null
+          contract_type?: string
+          created_at?: string
+          ev?: number | null
+          id?: string
+          payout_ratio?: number | null
+          picked?: boolean | null
+          run_id?: string | null
+          stat_confidence?: number | null
+          symbol?: string
+          win_prob_statistical?: number | null
+          win_prob_theoretical?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_candidates_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "dm_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dm_runs: {
+        Row: {
+          best_ev: number | null
+          candidates_scanned: number | null
           created_at: string
           duration_ms: number | null
           id: string
           message: string | null
-          signals_generated: number | null
           status: string
           ticks_collected: number | null
           trades_executed: number | null
         }
         Insert: {
+          best_ev?: number | null
+          candidates_scanned?: number | null
           created_at?: string
           duration_ms?: number | null
           id?: string
           message?: string | null
-          signals_generated?: number | null
           status: string
           ticks_collected?: number | null
           trades_executed?: number | null
         }
         Update: {
+          best_ev?: number | null
+          candidates_scanned?: number | null
           created_at?: string
           duration_ms?: number | null
           id?: string
           message?: string | null
-          signals_generated?: number | null
           status?: string
           ticks_collected?: number | null
           trades_executed?: number | null
         }
         Relationships: []
       }
-      deriv_signals: {
+      dm_state: {
         Row: {
-          acted: boolean
-          confidence: number | null
-          contract_type: string | null
-          created_at: string
-          digit: number | null
-          entropy: number | null
-          id: string
-          reasoning: string | null
-          symbol: string
+          consec_losses: number
+          cooldown_until: string | null
+          id: number
+          peak_balance: number | null
+          session_start_balance: number | null
+          session_started_at: string
+          updated_at: string
         }
         Insert: {
-          acted?: boolean
-          confidence?: number | null
-          contract_type?: string | null
-          created_at?: string
-          digit?: number | null
-          entropy?: number | null
-          id?: string
-          reasoning?: string | null
-          symbol: string
+          consec_losses?: number
+          cooldown_until?: string | null
+          id?: number
+          peak_balance?: number | null
+          session_start_balance?: number | null
+          session_started_at?: string
+          updated_at?: string
         }
         Update: {
-          acted?: boolean
-          confidence?: number | null
-          contract_type?: string | null
-          created_at?: string
-          digit?: number | null
-          entropy?: number | null
-          id?: string
-          reasoning?: string | null
-          symbol?: string
+          consec_losses?: number
+          cooldown_until?: string | null
+          id?: number
+          peak_balance?: number | null
+          session_start_balance?: number | null
+          session_started_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
-      deriv_ticks: {
+      dm_ticks: {
         Row: {
           created_at: string
           epoch: number
@@ -281,186 +184,75 @@ export type Database = {
         }
         Relationships: []
       }
-      deriv_trades: {
+      dm_trades: {
         Row: {
-          confidence: number | null
+          barrier: number | null
           contract_id: string | null
           contract_type: string
           created_at: string
-          digit: number
           entry_quote: number | null
+          ev: number | null
           exit_quote: number | null
           id: string
           payout: number | null
+          payout_ratio: number | null
           pnl: number | null
           reasoning: string | null
           settled_at: string | null
           stake: number
+          stat_confidence: number | null
           status: string
+          strategy: string | null
           symbol: string
+          win_prob_statistical: number | null
+          win_prob_theoretical: number | null
           won: boolean | null
         }
         Insert: {
-          confidence?: number | null
+          barrier?: number | null
           contract_id?: string | null
           contract_type: string
           created_at?: string
-          digit: number
           entry_quote?: number | null
+          ev?: number | null
           exit_quote?: number | null
           id?: string
           payout?: number | null
+          payout_ratio?: number | null
           pnl?: number | null
           reasoning?: string | null
           settled_at?: string | null
           stake: number
+          stat_confidence?: number | null
           status?: string
+          strategy?: string | null
           symbol: string
+          win_prob_statistical?: number | null
+          win_prob_theoretical?: number | null
           won?: boolean | null
         }
         Update: {
-          confidence?: number | null
+          barrier?: number | null
           contract_id?: string | null
           contract_type?: string
           created_at?: string
-          digit?: number
           entry_quote?: number | null
+          ev?: number | null
           exit_quote?: number | null
           id?: string
           payout?: number | null
+          payout_ratio?: number | null
           pnl?: number | null
           reasoning?: string | null
           settled_at?: string | null
           stake?: number
+          stat_confidence?: number | null
           status?: string
+          strategy?: string | null
           symbol?: string
+          win_prob_statistical?: number | null
+          win_prob_theoretical?: number | null
           won?: boolean | null
-        }
-        Relationships: []
-      }
-      portfolio_snapshots: {
-        Row: {
-          buying_power: number
-          cash: number
-          created_at: string
-          daily_pl: number | null
-          equity: number
-          id: string
-          portfolio_value: number
-          positions: Json
-        }
-        Insert: {
-          buying_power: number
-          cash: number
-          created_at?: string
-          daily_pl?: number | null
-          equity: number
-          id?: string
-          portfolio_value: number
-          positions?: Json
-        }
-        Update: {
-          buying_power?: number
-          cash?: number
-          created_at?: string
-          daily_pl?: number | null
-          equity?: number
-          id?: string
-          portfolio_value?: number
-          positions?: Json
-        }
-        Relationships: []
-      }
-      signal_weights: {
-        Row: {
-          id: string
-          losses: number
-          regime: string
-          signal_name: string
-          updated_at: string
-          weight: number
-          wins: number
-        }
-        Insert: {
-          id?: string
-          losses?: number
-          regime?: string
-          signal_name: string
-          updated_at?: string
-          weight?: number
-          wins?: number
-        }
-        Update: {
-          id?: string
-          losses?: number
-          regime?: string
-          signal_name?: string
-          updated_at?: string
-          weight?: number
-          wins?: number
-        }
-        Relationships: []
-      }
-      trade_reviews: {
-        Row: {
-          ai_lesson: string | null
-          ai_verdict: string | null
-          ai_weight_adjustments: Json | null
-          created_at: string
-          entry_price: number
-          entry_signals: Json | null
-          entry_trade_id: string | null
-          exit_price: number
-          exit_reason: string | null
-          exit_trade_id: string | null
-          hold_seconds: number | null
-          id: string
-          model: string | null
-          pnl: number
-          pnl_pct: number
-          qty: number
-          regime: string | null
-          symbol: string
-        }
-        Insert: {
-          ai_lesson?: string | null
-          ai_verdict?: string | null
-          ai_weight_adjustments?: Json | null
-          created_at?: string
-          entry_price: number
-          entry_signals?: Json | null
-          entry_trade_id?: string | null
-          exit_price: number
-          exit_reason?: string | null
-          exit_trade_id?: string | null
-          hold_seconds?: number | null
-          id?: string
-          model?: string | null
-          pnl: number
-          pnl_pct: number
-          qty: number
-          regime?: string | null
-          symbol: string
-        }
-        Update: {
-          ai_lesson?: string | null
-          ai_verdict?: string | null
-          ai_weight_adjustments?: Json | null
-          created_at?: string
-          entry_price?: number
-          entry_signals?: Json | null
-          entry_trade_id?: string | null
-          exit_price?: number
-          exit_reason?: string | null
-          exit_trade_id?: string | null
-          hold_seconds?: number | null
-          id?: string
-          model?: string | null
-          pnl?: number
-          pnl_pct?: number
-          qty?: number
-          regime?: string | null
-          symbol?: string
         }
         Relationships: []
       }

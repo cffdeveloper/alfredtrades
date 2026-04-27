@@ -1,577 +1,292 @@
-import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { MetricCard } from "@/components/dashboard/MetricCard";
-import { SignalBadge } from "@/components/dashboard/SignalBadge";
-import { fmtUSD, fmtPct, fmtTime } from "@/lib/format";
-import { computeRealizedPnL } from "@/lib/pnl";
-import { toast } from "sonner";
-import bullBearImg from "@/assets/bull-bear-color.png";
-import bullMark from "@/assets/bull-mark-color.png";
-import {
-  Activity, Play, RefreshCw, Brain, Layers,
-  Zap,
-  ClockIcon as HistoryIcon, LineChart as LineChartIcon, Signal as SignalIcon,
-} from "lucide-react";
-import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
-} from "recharts";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { DerivPanel } from "@/components/dashboard/DerivPanel";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Activity, Brain, TrendingUp, AlertTriangle, Zap, Target, Wallet, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/")({
-  component: Dashboard,
+  component: DashboardPage,
   head: () => ({
     meta: [
-      { title: "Maverick Bot v2 — Multi-Strategy Trading Dashboard" },
-      { name: "description", content: "Live paper-trading dashboard for the Maverick v2 multi-strategy engine: VWAP Z-Score · Adaptive Momentum · Opening Range Breakout." },
+      { title: "Deriv Master Bot · EV Arbitrage Dashboard" },
+      { name: "description", content: "Live monitor for the Deriv Master Bot v3.0 — EV arbitrage scanner across R_10/25/50/75/100 with Bayesian + n-gram statistical intelligence." },
     ],
   }),
 });
 
-interface Position { symbol: string; qty: number; avg_entry: number; current_price: number; market_value: number; unrealized_pl: number; unrealized_plpc: number }
-interface Snapshot { id: string; equity: number; cash: number; portfolio_value: number; buying_power: number; positions: Position[]; daily_pl: number | null; created_at: string }
-interface Signal { id: string; symbol: string; signal: string; price: number; reason: string | null; rsi: number | null; strategy: string | null; confidence: number | null; regime: string | null; zscore: number | null; created_at: string }
-interface Trade { id: string; symbol: string; side: string; qty: number; price: number; value: number; strategy: string | null; confidence: number | null; stop_price: number | null; target_price: number | null; created_at: string }
-interface Run { id: string; status: string; trades_executed: number; signals_generated: number; market_open: boolean | null; duration_ms: number | null; created_at: string; message: string | null; daily_pl: number | null; halt_entries: boolean | null; regime_summary: Record<string, { regime: string; conf: number }> | null }
-interface TradeReview { id: string; symbol: string; pnl: number; pnl_pct: number; hold_seconds: number | null; exit_reason: string | null; regime: string | null; ai_verdict: string | null; ai_lesson: string | null; ai_weight_adjustments: Array<{ signal_name: string; regime: string; delta: number }> | null; created_at: string }
-interface SignalWeight { id: string; signal_name: string; regime: string; weight: number; wins: number; losses: number; updated_at: string }
+type Run = { id: string; status: string; message: string | null; ticks_collected: number | null; candidates_scanned: number | null; trades_executed: number | null; best_ev: number | null; duration_ms: number | null; created_at: string };
+type Trade = { id: string; symbol: string; contract_type: string; barrier: number | null; stake: number; payout: number | null; payout_ratio: number | null; ev: number | null; status: string; pnl: number | null; won: boolean | null; reasoning: string | null; created_at: string };
+type Candidate = { id: string; run_id: string | null; symbol: string; contract_type: string; barrier: number | null; ev: number | null; payout_ratio: number | null; win_prob_theoretical: number | null; win_prob_statistical: number | null; stat_confidence: number | null; picked: boolean | null; created_at: string };
+type Balance = { balance: number; currency: string; loginid: string | null; created_at: string };
+type State = { peak_balance: number | null; consec_losses: number; cooldown_until: string | null; session_start_balance: number | null; session_started_at: string };
 
-const REGIME_COLORS: Record<string, string> = {
-  TRENDING_UP: "text-success border-success/40 bg-success/10",
-  TRENDING_DOWN: "text-destructive border-destructive/40 bg-destructive/10",
-  RANGING: "text-primary border-primary/40 bg-primary/10",
-  VOLATILE: "text-warning border-warning/40 bg-warning/10",
-  UNKNOWN: "text-muted-foreground border-border bg-muted",
+const SYMBOLS = ["R_10", "R_25", "R_50", "R_75", "R_100"];
+const CONTRACT_LABEL: Record<string, string> = {
+  DIGITMATCH: "Match", DIGITDIFF: "Differ", DIGITEVEN: "Even",
+  DIGITODD: "Odd", DIGITOVER: "Over", DIGITUNDER: "Under",
 };
 
-function ConfidenceBar({ value }: { value: number | null }) {
-  const v = value ?? 0;
-  const color = v >= 70 ? "bg-success" : v >= 50 ? "bg-primary" : "bg-muted-foreground";
-  return (
-    <div className="flex items-center gap-1.5 min-w-[60px]">
-      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-        <div className={`h-full ${color}`} style={{ width: `${v}%` }} />
-      </div>
-      <span className="font-mono text-[10px] text-muted-foreground tabular-nums w-6 text-right">{v}</span>
-    </div>
-  );
-}
-
-function Dashboard() {
-  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
-  const [signals, setSignals] = useState<Signal[]>([]);
-  const [trades, setTrades] = useState<Trade[]>([]);
+function DashboardPage() {
   const [runs, setRuns] = useState<Run[]>([]);
-  const [reviews, setReviews] = useState<TradeReview[]>([]);
-  const [weights, setWeights] = useState<SignalWeight[]>([]);
-  const [running, setRunning] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const loadAll = async () => {
-    const [snapRes, sigRes, trdRes, runRes, revRes, wRes] = await Promise.all([
-      supabase.from("portfolio_snapshots").select("*").order("created_at", { ascending: false }).limit(200),
-      supabase.from("bot_signals").select("*").order("created_at", { ascending: false }).limit(80),
-      supabase.from("bot_trades").select("*").order("created_at", { ascending: false }).limit(80),
-      supabase.from("bot_runs").select("*").order("created_at", { ascending: false }).limit(20),
-      supabase.from("trade_reviews").select("*").order("created_at", { ascending: false }).limit(10),
-      supabase.from("signal_weights").select("*").order("weight", { ascending: false }),
-    ]);
-    if (snapRes.data) setSnapshots(snapRes.data as unknown as Snapshot[]);
-    if (sigRes.data) setSignals(sigRes.data as unknown as Signal[]);
-    if (trdRes.data) setTrades(trdRes.data as unknown as Trade[]);
-    if (runRes.data) setRuns(runRes.data as unknown as Run[]);
-    if (revRes.data) setReviews(revRes.data as unknown as TradeReview[]);
-    if (wRes.data) setWeights(wRes.data as unknown as SignalWeight[]);
-    setLoading(false);
-  };
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [balance, setBalance] = useState<Balance | null>(null);
+  const [state, setState] = useState<State | null>(null);
+  const [digitDist, setDigitDist] = useState<Record<string, number[]>>({});
+  const [nowTick, setNowTick] = useState(0);
 
   useEffect(() => {
-    loadAll();
-    const t = setInterval(loadAll, 30_000);
+    const t = setInterval(() => setNowTick((n) => n + 1), 1000);
     return () => clearInterval(t);
   }, []);
 
-  const runBot = async () => {
-    setRunning(true);
-    toast.loading("Running bot cycle…", { id: "bot-run" });
-    try {
-      const { data, error } = await supabase.functions.invoke("run-bot");
-      if (error) throw error;
-      const d = data as { runStatus: string; marketOpen: boolean; tradesExecuted: number; signalsGenerated: number; duration: number; haltEntries: boolean };
-      toast.success(
-        `Cycle complete (${d.duration}ms) — ${d.signalsGenerated} signals, ${d.tradesExecuted} trades${d.marketOpen ? "" : " · market closed"}${d.haltEntries ? " · ⛔ daily loss halt" : ""}`,
-        { id: "bot-run" },
-      );
-      await loadAll();
-    } catch (e) {
-      toast.error(`Bot run failed: ${(e as Error).message}`, { id: "bot-run" });
-    } finally {
-      setRunning(false);
-    }
+  useEffect(() => {
+    const load = async () => {
+      const [r, t, c, b, s] = await Promise.all([
+        supabase.from("dm_runs").select("*").order("created_at", { ascending: false }).limit(15),
+        supabase.from("dm_trades").select("*").order("created_at", { ascending: false }).limit(20),
+        supabase.from("dm_candidates").select("*").order("created_at", { ascending: false }).limit(40),
+        supabase.from("dm_balance").select("*").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("dm_state").select("*").eq("id", 1).maybeSingle(),
+      ]);
+      if (r.data) setRuns(r.data as Run[]);
+      if (t.data) setTrades(t.data as Trade[]);
+      if (c.data) setCandidates(c.data as Candidate[]);
+      if (b.data) setBalance(b.data as Balance);
+      if (s.data) setState(s.data as State);
+
+      // Per-symbol digit distribution from last 200 ticks each
+      const dist: Record<string, number[]> = {};
+      for (const sym of SYMBOLS) {
+        const { data } = await supabase.from("dm_ticks").select("last_digit")
+          .eq("symbol", sym).order("epoch", { ascending: false }).limit(200);
+        const counts = new Array(10).fill(0);
+        for (const row of data ?? []) counts[(row as any).last_digit]++;
+        dist[sym] = counts;
+      }
+      setDigitDist(dist);
+    };
+    load();
+    const i = setInterval(load, 5000);
+    return () => clearInterval(i);
+  }, []);
+
+  const settled = trades.filter((t) => t.status !== "open" && t.pnl !== null);
+  const wins = settled.filter((t) => t.won).length;
+  const totalPnl = settled.reduce((s, t) => s + (t.pnl ?? 0), 0);
+  const winRate = settled.length ? (wins / settled.length) * 100 : 0;
+  const lastRun = runs[0];
+  const cooldown = state?.cooldown_until ? new Date(state.cooldown_until) : null;
+  const inCooldown = cooldown && cooldown > new Date();
+  const drawdown = state?.peak_balance && balance
+    ? Math.max(0, ((state.peak_balance - balance.balance) / state.peak_balance) * 100) : 0;
+
+  const triggerRun = async () => {
+    await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/deriv-master`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+    });
   };
 
-  const latest = snapshots[0];
-  const first = snapshots[snapshots.length - 1];
-  const totalReturn = latest && first && first.equity > 0
-    ? ((latest.equity - first.equity) / first.equity) * 100
-    : 0;
-  const lastRun = runs[0];
-  const positions = latest?.positions ?? [];
-  const dailyPL = latest?.daily_pl ?? lastRun?.daily_pl ?? 0;
-
-  // P&L breakdown
-  const realizedPL = useMemo(() => computeRealizedPnL(trades), [trades]);
-  const unrealizedPL = positions.reduce((sum, p) => sum + Number(p.unrealized_pl ?? 0), 0);
-  const totalPL = realizedPL + unrealizedPL;
-
-  const equitySeries = [...snapshots].reverse().map((s) => ({
-    t: new Date(s.created_at).getTime(),
-    label: fmtTime(s.created_at),
-    equity: Number(s.equity),
-    cash: Number(s.cash),
-  }));
-
-  const regimeMap = lastRun?.regime_summary ?? {};
-
-  // Strategy breakdown from recent signals (excluding HOLD/None)
-  const stratCounts: Record<string, number> = {};
-  for (const s of signals) {
-    if (s.signal === "HOLD" || !s.strategy || s.strategy === "None") continue;
-    stratCounts[s.strategy] = (stratCounts[s.strategy] ?? 0) + 1;
-  }
-  const stratData = Object.entries(stratCounts).map(([strategy, count]) => ({ strategy, count }));
-
   return (
-    <div className="min-h-screen relative">
-      {/* Bull & Bear watermark — fixed, very faint */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-0 flex justify-center opacity-[0.18] select-none mix-blend-multiply"
-      >
-        <img
-          src={bullBearImg}
-          alt=""
-          className="w-[min(1400px,140vw)] max-w-none"
-        />
-      </div>
-
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="relative border-b border-border bg-background/85 backdrop-blur-xl sticky top-0 z-20">
-        <div className="absolute inset-0 blueprint-grid opacity-60 pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)" }} />
-        <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 flex items-center justify-between flex-wrap gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-md flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-[var(--gold)]/60 shadow-md">
-              <img src={bullMark} alt="Maverick" className="h-full w-full object-cover" />
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-primary/40 flex items-center justify-center">
+              <Brain className="h-5 w-5 text-primary-foreground" />
             </div>
-            <div className="flex flex-col min-w-0">
-              <h1 className="font-display text-xl sm:text-3xl font-semibold leading-none tracking-tight flex items-baseline gap-1.5 sm:gap-2">
-                <span className="bg-gradient-to-br from-primary via-[var(--primary-glow)] to-[var(--gold)] bg-clip-text text-transparent">Maverick</span>
-                <span className="text-[var(--gold)]">.</span>
-                <span className="eyebrow ml-0.5 sm:ml-1 -translate-y-1 hidden sm:inline !text-[var(--gold)]">v2.0</span>
-              </h1>
-              <p className="font-serif italic mt-0.5 sm:mt-1 text-muted-foreground text-[11px] sm:text-sm truncate tracking-wide">
-                Multi-Strategy · Regime-Adaptive
-              </p>
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight">Deriv Master Bot</h1>
+              <p className="text-xs text-muted-foreground">v3.0 · EV Arbitrage + Statistical Intelligence</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {lastRun?.halt_entries && (
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/40 bg-destructive/5 text-destructive text-xs font-medium">
-                <Zap className="h-3 w-3" /> Daily Loss Halt
-              </div>
+          <div className="flex items-center gap-2">
+            {inCooldown ? (
+              <Badge variant="destructive" className="gap-1.5"><AlertTriangle className="h-3 w-3" /> Cooldown</Badge>
+            ) : (
+              <Badge variant="outline" className="gap-1.5 border-green-500/40 text-green-500">
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" /> Live · 1m cycle
+              </Badge>
             )}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-card text-xs">
-              <span className={`relative flex h-2 w-2 ${lastRun?.market_open ? "" : "opacity-40"}`}>
-                {lastRun?.market_open && <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-60 animate-ping" />}
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${lastRun?.market_open ? "bg-success" : "bg-muted-foreground"}`} />
-              </span>
-              <span className="eyebrow !text-muted-foreground">{lastRun?.market_open ? "Market Live" : "Market Closed"}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={loadAll} disabled={loading} className="text-muted-foreground hover:text-foreground h-8 w-8 sm:h-9 sm:w-9 p-0">
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            </Button>
-            <Button
-              onClick={runBot}
-              disabled={running}
-              size="sm"
-              className="rounded-md font-medium tracking-wide text-xs sm:text-sm h-8 sm:h-9 px-3 text-primary-foreground shadow-md border border-[var(--gold)]/40"
-              style={{ background: "var(--gradient-primary)" }}
-            >
-              <Play className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" fill="currentColor" />
-              {running ? "…" : "Run"}
-              <span className="hidden sm:inline">&nbsp;Cycle</span>
-            </Button>
+            <button onClick={triggerRun} className="text-xs px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+              Run cycle now
+            </button>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14 space-y-8 sm:space-y-12">
-        <Tabs defaultValue="alpaca" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="alpaca">Alpaca</TabsTrigger>
-            <TabsTrigger value="deriv">Deriv</TabsTrigger>
-          </TabsList>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* KPI strip */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Kpi icon={<Wallet className="h-4 w-4" />} label="Balance" value={balance ? `${balance.balance.toFixed(2)} ${balance.currency}` : "—"} sub={balance?.loginid ?? "demo"} />
+          <Kpi icon={<TrendingUp className={totalPnl >= 0 ? "h-4 w-4 text-green-500" : "h-4 w-4 text-red-500"} />} label="Session P&L" value={`${totalPnl >= 0 ? "+" : ""}${totalPnl.toFixed(2)}`} sub={`${settled.length} settled · ${winRate.toFixed(0)}% win`} tone={totalPnl >= 0 ? "pos" : "neg"} />
+          <Kpi icon={<Target className="h-4 w-4" />} label="Best EV (last cycle)" value={lastRun?.best_ev != null ? `${(lastRun.best_ev * 100).toFixed(2)}%` : "—"} sub={`${lastRun?.candidates_scanned ?? 0} scanned`} />
+          <Kpi icon={<Activity className="h-4 w-4" />} label="Drawdown" value={`${drawdown.toFixed(1)}%`} sub={`Peak ${state?.peak_balance?.toFixed(2) ?? "—"} · Streak L${state?.consec_losses ?? 0}`} tone={drawdown > 10 ? "neg" : "default"} />
+        </div>
 
-          <TabsContent value="alpaca" className="space-y-8 sm:space-y-12">
-        {/* Thesis line — italic serif, the page's voice */}
-        <section className="max-w-3xl">
-          <p className="eyebrow mb-2 sm:mb-3 !text-[var(--gold)]">— The Thesis —</p>
-          <p className="font-serif italic text-lg sm:text-3xl lg:text-4xl text-foreground leading-snug tracking-tight">
-            <span className="font-display not-italic text-primary">D</span>isciplined capital, deployed by rule.
-            <span className="text-muted-foreground"> A multi-strategy engine that reads the regime before it reads the price.</span>
-          </p>
-        </section>
-
-        {/* Hero metrics */}
-        <section>
-          <p className="eyebrow mb-3 sm:mb-4">Portfolio · Live</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
-            <MetricCard ornament="01" label="Portfolio Value" value={latest ? fmtUSD(latest.portfolio_value) : "—"} sub="Equity + cash" />
-            <MetricCard ornament="02" label="Daily P&L" value={latest || lastRun ? fmtUSD(dailyPL) : "—"} sub="Today vs last close" tone={dailyPL >= 0 ? "positive" : "negative"} />
-            <MetricCard ornament="03" label="Realized P&L" value={trades.length ? fmtUSD(realizedPL) : "—"} sub="Closed round-trips" tone={realizedPL >= 0 ? "positive" : "negative"} />
-            <MetricCard ornament="04" label="Unrealized P&L" value={positions.length ? fmtUSD(unrealizedPL) : "—"} sub={`${positions.length} open · ${positions.length}/4 max`} tone={unrealizedPL >= 0 ? "positive" : "negative"} />
-            <MetricCard ornament="05" label="Net P&L" value={(trades.length || positions.length) ? fmtUSD(totalPL) : "—"} sub={latest ? `Return ${fmtPct(totalReturn)}` : ""} tone={totalPL >= 0 ? "positive" : "negative"} />
-          </div>
-        </section>
-
-        {/* Regime grid */}
-        {Object.keys(regimeMap).length > 0 && (
-          <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
-            <div className="flex items-start justify-between mb-6">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Digit distribution heatmap */}
+          <Card className="lg:col-span-2 p-5">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="eyebrow flex items-center gap-2"><Brain className="h-3 w-3" /> Market Regime</p>
-                <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Per-symbol classification</h2>
-                <p className="text-sm text-muted-foreground mt-1.5">The regime drives strategy selection — never the other way around.</p>
+                <h2 className="text-sm font-semibold flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /> Digit Distribution</h2>
+                <p className="text-xs text-muted-foreground">Last 200 ticks per symbol · deviation from uniform 10%</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-              {Object.entries(regimeMap).map(([sym, info]) => (
-                <div key={sym} className={`rounded-lg border p-3 ${REGIME_COLORS[info.regime] ?? REGIME_COLORS.UNKNOWN}`}>
-                  <div className="font-display text-base font-medium">{sym}</div>
-                  <div className="text-[10px] uppercase tracking-[0.18em] mt-1.5 opacity-80">{info.regime.replace("_", " ")}</div>
-                  <div className="font-mono text-[10px] mt-1 opacity-60">conf {info.conf}</div>
+            <div className="space-y-2">
+              <div className="grid grid-cols-[60px_repeat(10,1fr)] gap-1 text-[10px] text-muted-foreground">
+                <div></div>
+                {Array.from({ length: 10 }, (_, i) => <div key={i} className="text-center">{i}</div>)}
+              </div>
+              {SYMBOLS.map((sym) => {
+                const counts = digitDist[sym] ?? new Array(10).fill(0);
+                const total = counts.reduce((a, b) => a + b, 0) || 1;
+                return (
+                  <div key={sym} className="grid grid-cols-[60px_repeat(10,1fr)] gap-1 items-center">
+                    <div className="text-xs font-mono text-muted-foreground">{sym}</div>
+                    {counts.map((c, i) => {
+                      const pct = c / total;
+                      const dev = pct - 0.1;
+                      const intensity = Math.min(1, Math.abs(dev) * 8);
+                      const color = dev > 0
+                        ? `rgba(34, 197, 94, ${0.15 + intensity * 0.55})`
+                        : `rgba(239, 68, 68, ${0.15 + intensity * 0.55})`;
+                      return (
+                        <div key={i} className="aspect-square rounded text-[10px] flex items-center justify-center font-mono tabular-nums" style={{ background: total > 0 ? color : "hsl(var(--muted))" }} title={`${sym} digit ${i}: ${c} (${(pct*100).toFixed(1)}%)`}>
+                          {total > 0 ? (pct * 100).toFixed(0) : "·"}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+
+          {/* Cycle log */}
+          <Card className="p-5">
+            <h2 className="text-sm font-semibold flex items-center gap-2 mb-4"><Clock className="h-4 w-4 text-primary" /> Recent Cycles</h2>
+            <div className="space-y-2 max-h-[420px] overflow-y-auto">
+              {runs.length === 0 && <p className="text-xs text-muted-foreground">No cycles yet. Trigger one above.</p>}
+              {runs.map((r) => (
+                <div key={r.id} className="text-xs border-l-2 pl-2.5 py-1" style={{ borderColor: r.status === "success" ? "rgb(34 197 94)" : r.status === "error" ? "rgb(239 68 68)" : "rgb(234 179 8)" }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-muted-foreground">{new Date(r.created_at).toLocaleTimeString()}</span>
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{r.status}</span>
+                  </div>
+                  <div className="mt-0.5">{r.message ?? "—"}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                    {r.ticks_collected ?? 0}t · {r.candidates_scanned ?? 0}c · {r.trades_executed ?? 0}x · {r.duration_ms ?? 0}ms
+                  </div>
                 </div>
               ))}
             </div>
-          </section>
-        )}
+          </Card>
+        </div>
 
-        {/* Equity curve */}
-        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
-          <div className="mb-6">
-            <p className="eyebrow flex items-center gap-2"><Activity className="h-3 w-3" /> Performance</p>
-            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Equity curve</h2>
-            <p className="text-sm text-muted-foreground mt-1.5">Portfolio value, marked-to-market across every cycle.</p>
-          </div>
-          {equitySeries.length > 1 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={equitySeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.42 0.13 160)" stopOpacity={0.45} />
-                    <stop offset="50%" stopColor="oklch(0.72 0.14 75)" stopOpacity={0.18} />
-                    <stop offset="100%" stopColor="oklch(0.42 0.13 160)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="oklch(0.82 0.04 85)" strokeDasharray="2 4" vertical={false} />
-                <XAxis dataKey="label" stroke="oklch(0.45 0.04 130)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="oklch(0.45 0.04 130)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
-                <Tooltip
-                  contentStyle={{ background: "oklch(0.985 0.012 85)", border: "1px solid oklch(0.72 0.14 75)", borderRadius: 6, fontSize: 12 }}
-                  labelStyle={{ color: "oklch(0.45 0.04 130)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.15em" }}
-                  formatter={(v: number) => fmtUSD(v)}
-                />
-                <Area type="monotone" dataKey="equity" stroke="oklch(0.42 0.13 160)" strokeWidth={2} fill="url(#eq)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[300px] flex flex-col items-center justify-center text-center text-muted-foreground border border-dashed border-border rounded-lg">
-              <Activity className="h-8 w-8 mb-3 opacity-30" />
-              <p className="font-display italic text-base">No snapshots yet.</p>
-              <p className="text-xs mt-1">Run a cycle to capture your first portfolio snapshot.</p>
-            </div>
-          )}
-        </section>
-
-        {/* Strategy mix */}
-        {stratData.length > 0 && (
-          <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
-            <div className="mb-6">
-              <p className="eyebrow flex items-center gap-2"><Layers className="h-3 w-3" /> Strategy Mix</p>
-              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Signal distribution</h2>
-              <p className="text-sm text-muted-foreground mt-1.5">Recent signal counts by strategy.</p>
-            </div>
-            <div className="h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stratData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="oklch(0.82 0.04 85)" strokeDasharray="2 4" vertical={false} />
-                  <XAxis dataKey="strategy" stroke="oklch(0.45 0.04 130)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="oklch(0.45 0.04 130)" fontSize={11} allowDecimals={false} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ background: "oklch(0.985 0.012 85)", border: "1px solid oklch(0.82 0.04 85)", borderRadius: 6, fontSize: 12 }} />
-                  <Bar dataKey="count" fill="oklch(0.42 0.13 160)" radius={[3, 3, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
-        )}
-
-        {/* Positions */}
-        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8">
-          <div className="mb-6">
-            <p className="eyebrow">Book</p>
-            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Open positions</h2>
-            <p className="text-sm text-muted-foreground mt-1.5">Live exposure with realized stops &amp; targets.</p>
-          </div>
-          {positions.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No open positions.</p>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm font-mono">
-                  <thead className="text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border">
-                    <tr>
-                      <th className="text-left py-2">Symbol</th>
-                      <th className="text-right py-2">Qty</th>
-                      <th className="text-right py-2">Avg Entry</th>
-                      <th className="text-right py-2">Current</th>
-                      <th className="text-right py-2">Market Value</th>
-                      <th className="text-right py-2">P&amp;L $</th>
-                      <th className="text-right py-2">P&amp;L %</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {positions.map((p) => (
-                      <tr key={p.symbol} className="border-b border-border/50 hover:bg-accent/30">
-                        <td className="py-3 font-bold text-primary">{p.symbol}</td>
-                        <td className="text-right">{p.qty}</td>
-                        <td className="text-right">{fmtUSD(p.avg_entry)}</td>
-                        <td className="text-right">{fmtUSD(p.current_price)}</td>
-                        <td className="text-right">{fmtUSD(p.market_value)}</td>
-                        <td className={`text-right font-bold ${p.unrealized_pl >= 0 ? "text-success" : "text-destructive"}`}>{fmtUSD(p.unrealized_pl)}</td>
-                        <td className={`text-right font-bold ${p.unrealized_plpc >= 0 ? "text-success" : "text-destructive"}`}>{fmtPct(p.unrealized_plpc)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mt-6 h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={positions}>
-                    <CartesianGrid stroke="oklch(0.82 0.04 85)" strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="symbol" stroke="oklch(0.50 0.015 250)" fontSize={11} />
-                    <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} tickFormatter={(v) => `$${v}`} />
-                    <Tooltip contentStyle={{ background: "oklch(0.985 0.012 85)", border: "1px solid oklch(0.82 0.04 85)", borderRadius: 8 }} formatter={(v: number) => fmtUSD(v)} />
-                    <Bar dataKey="unrealized_pl" radius={[6, 6, 0, 0]}>
-                      {positions.map((p) => (
-                        <Cell key={p.symbol} fill={p.unrealized_pl >= 0 ? "oklch(0.50 0.15 155)" : "oklch(0.45 0.18 25)"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </>
-          )}
-        </section>
-
-        {/* Signals + Trades */}
-        <section className="grid lg:grid-cols-2 gap-6">
-          <div className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
-            <div className="mb-5">
-              <p className="eyebrow flex items-center gap-2"><SignalIcon className="h-3 w-3" /> Tape</p>
-              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Recent signals</h2>
-            </div>
-            <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
-              {signals.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No signals yet.</p>}
-              {signals.map((s) => (
-                <div key={s.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-background/30 hover:border-primary/30 transition-colors">
-                  <SignalBadge signal={s.signal} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="font-mono font-bold text-sm">{s.symbol}</span>
-                      <span className="font-mono text-xs text-muted-foreground tabular-nums">{fmtUSD(s.price)}</span>
-                      {s.strategy && s.strategy !== "None" && (
-                        <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-primary/30 text-primary">{s.strategy}</span>
-                      )}
-                      {s.regime && (
-                        <span className={`font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${REGIME_COLORS[s.regime] ?? REGIME_COLORS.UNKNOWN}`}>{s.regime.replace("_", " ")}</span>
-                      )}
-                    </div>
-                    {s.reason && <p className="text-xs text-muted-foreground mt-1 break-words">{s.reason}</p>}
-                    {s.confidence != null && s.confidence > 0 && (
-                      <div className="mt-1.5"><ConfidenceBar value={s.confidence} /></div>
-                    )}
-                  </div>
-                  <span className="font-mono text-[10px] text-muted-foreground whitespace-nowrap">{fmtTime(s.created_at)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
-            <div className="mb-5">
-              <p className="eyebrow flex items-center gap-2"><LineChartIcon className="h-3 w-3" /> Blotter</p>
-              <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Executed trades</h2>
-            </div>
-            <div className="space-y-2 max-h-[520px] overflow-y-auto pr-2">
-              {trades.length === 0 && <p className="text-sm text-muted-foreground py-8 text-center">No trades yet.</p>}
-              {trades.map((t) => (
-                <div key={t.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-background/30">
-                  <span className={`px-2 py-0.5 rounded-md border text-[10px] font-mono font-bold tracking-wider ${t.side === "buy" ? "bg-success/10 border-success/40 text-success" : "bg-destructive/10 border-destructive/40 text-destructive"}`}>
-                    {t.side.toUpperCase()}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-mono text-sm flex flex-wrap gap-x-2 items-baseline">
-                      <span className="font-bold">{t.symbol}</span>
-                      <span className="text-muted-foreground">{t.qty} @ {fmtUSD(t.price)}</span>
-                      {t.strategy && (
-                        <span className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-primary/30 text-primary">{t.strategy}</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Total {fmtUSD(t.value)}
-                      {t.stop_price != null && <> · Stop {fmtUSD(t.stop_price)}</>}
-                      {t.target_price != null && <> · Target {fmtUSD(t.target_price)}</>}
-                    </p>
-                  </div>
-                  <span className="font-mono text-[10px] text-muted-foreground whitespace-nowrap">{fmtTime(t.created_at)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Bot Brain — AI learning loop */}
-        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
-          <div className="mb-6">
-            <p className="eyebrow flex items-center gap-2"><Brain className="h-3 w-3" /> Bot Brain</p>
-            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">AI trade reviews & adaptive weights</h2>
-            <p className="text-sm text-muted-foreground mt-1.5">After every closed trade, AI reviews what worked and tunes signal weights for the next cycle.</p>
-          </div>
-
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Reviews */}
-            <div className="lg:col-span-2 space-y-3">
-              <p className="eyebrow text-[10px]">Latest reviews</p>
-              {reviews.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-6 text-center border border-dashed border-border rounded-lg">
-                  No closed round-trips yet. Reviews appear automatically when a position closes.
-                </p>
-              ) : (
-                reviews.map((r) => (
-                  <div key={r.id} className="border border-border rounded-lg p-4 bg-background/40">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-sm font-semibold">{r.symbol}</span>
-                        {r.regime && <span className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${REGIME_COLORS[r.regime] ?? REGIME_COLORS.UNKNOWN}`}>{r.regime}</span>}
-                        <span className="text-[10px] uppercase text-muted-foreground">{r.exit_reason}</span>
-                      </div>
-                      <div className="text-right">
-                        <div className={`font-mono text-sm font-semibold ${r.pnl >= 0 ? "text-success" : "text-destructive"}`}>{fmtUSD(r.pnl)}</div>
-                        <div className={`font-mono text-[10px] ${r.pnl >= 0 ? "text-success" : "text-destructive"}`}>{r.pnl_pct >= 0 ? "+" : ""}{r.pnl_pct.toFixed(2)}%</div>
-                      </div>
-                    </div>
-                    <p className="text-sm text-foreground/90 leading-snug">{r.ai_verdict}</p>
-                    {r.ai_lesson && <p className="text-xs text-muted-foreground italic mt-1.5">→ {r.ai_lesson}</p>}
-                    {r.ai_weight_adjustments && r.ai_weight_adjustments.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {r.ai_weight_adjustments.map((a, i) => (
-                          <span key={i} className={`font-mono text-[10px] px-1.5 py-0.5 rounded border ${a.delta >= 0 ? "border-success/40 text-success bg-success/5" : "border-destructive/40 text-destructive bg-destructive/5"}`}>
-                            {a.signal_name}/{a.regime} {a.delta >= 0 ? "+" : ""}{a.delta.toFixed(2)}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <p className="text-[10px] text-muted-foreground/70 mt-2 font-mono">{fmtTime(r.created_at)}</p>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Adaptive weights */}
-            <div>
-              <p className="eyebrow text-[10px] mb-3">Current signal weights</p>
-              <div className="space-y-2">
-                {weights.map((w) => {
-                  const total = w.wins + w.losses;
-                  const wr = total > 0 ? Math.round((w.wins / total) * 100) : null;
-                  const pct = Math.min(100, (w.weight / 2) * 100);
-                  return (
-                    <div key={w.id} className="border border-border rounded-md p-2.5 bg-background/40">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-mono text-xs">{w.signal_name}</span>
-                        <span className="font-mono text-xs tabular-nums font-semibold">{w.weight.toFixed(2)}×</span>
-                      </div>
-                      <div className="h-1 rounded-full bg-muted overflow-hidden mb-1">
-                        <div className={`h-full ${w.weight >= 1 ? "bg-success" : "bg-destructive"}`} style={{ width: `${pct}%` }} />
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
-                        <span>{w.regime}</span>
-                        <span>{total > 0 ? `${w.wins}W/${w.losses}L · ${wr}%` : "no data"}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Recent runs */}
-        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
-          <div className="mb-6">
-            <p className="eyebrow flex items-center gap-2"><HistoryIcon className="h-3 w-3" /> Audit Log</p>
-            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Cycle history</h2>
-            <p className="text-sm text-muted-foreground mt-1.5">Every run, signed and timestamped.</p>
-            <p className="text-[11px] text-muted-foreground/80 mt-2 italic">"Acct Day P&amp;L" = the broker's intraday equity change at the instant of the cycle. It is <span className="text-foreground/80">not</span> profit earned by that cycle. For real performance see Realized / Net P&amp;L above.</p>
-          </div>
-          {runs.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">No runs yet — kick one off above.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm font-mono">
-                <thead className="text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border">
-                  <tr>
-                    <th className="text-left py-2">Time</th>
-                    <th className="text-left py-2">Status</th>
-                    <th className="text-right py-2">Signals</th>
-                    <th className="text-right py-2">Trades</th>
-                    <th className="text-right py-2" title="Account intraday P&L at the moment of this cycle — NOT profit from this cycle alone">Acct Day P&amp;L</th>
-                    <th className="text-right py-2">Duration</th>
-                    <th className="text-left py-2 pl-4">Market</th>
+        {/* Candidates ranking */}
+        <Card className="p-5">
+          <h2 className="text-sm font-semibold flex items-center gap-2 mb-4"><Target className="h-4 w-4 text-primary" /> Latest EV Candidates</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="text-muted-foreground border-b border-border">
+                <tr>
+                  <th className="text-left py-2 px-2 font-medium">Symbol</th>
+                  <th className="text-left py-2 px-2 font-medium">Contract</th>
+                  <th className="text-right py-2 px-2 font-medium">Theo p</th>
+                  <th className="text-right py-2 px-2 font-medium">Stat p</th>
+                  <th className="text-right py-2 px-2 font-medium">Payout×</th>
+                  <th className="text-right py-2 px-2 font-medium">EV</th>
+                  <th className="text-right py-2 px-2 font-medium">Conf</th>
+                  <th className="text-center py-2 px-2 font-medium">Picked</th>
+                </tr>
+              </thead>
+              <tbody>
+                {candidates.length === 0 && (
+                  <tr><td colSpan={8} className="py-6 text-center text-muted-foreground">Waiting for first scan…</td></tr>
+                )}
+                {candidates.slice(0, 15).map((c) => (
+                  <tr key={c.id} className="border-b border-border/40 hover:bg-muted/30">
+                    <td className="py-1.5 px-2 font-mono">{c.symbol}</td>
+                    <td className="py-1.5 px-2">{CONTRACT_LABEL[c.contract_type] ?? c.contract_type}{c.barrier !== null ? ` ${c.barrier}` : ""}</td>
+                    <td className="py-1.5 px-2 text-right tabular-nums">{c.win_prob_theoretical?.toFixed(3) ?? "—"}</td>
+                    <td className="py-1.5 px-2 text-right tabular-nums">{c.win_prob_statistical?.toFixed(3) ?? "—"}</td>
+                    <td className="py-1.5 px-2 text-right tabular-nums">{c.payout_ratio?.toFixed(3) ?? "—"}</td>
+                    <td className={`py-1.5 px-2 text-right tabular-nums font-medium ${(c.ev ?? 0) > 0 ? "text-green-500" : "text-red-500"}`}>
+                      {c.ev != null ? `${(c.ev * 100).toFixed(2)}%` : "—"}
+                    </td>
+                    <td className="py-1.5 px-2 text-right tabular-nums">{c.stat_confidence?.toFixed(2) ?? "—"}</td>
+                    <td className="py-1.5 px-2 text-center">{c.picked ? <Badge variant="default" className="text-[10px]">✓</Badge> : <span className="text-muted-foreground">·</span>}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {runs.map((r) => (
-                    <tr key={r.id} className="border-b border-border/50">
-                      <td className="py-2 text-muted-foreground">{fmtTime(r.created_at)}</td>
-                      <td className={r.status === "success" ? "text-success" : "text-destructive"}>{r.status.toUpperCase()}{r.halt_entries ? " · HALT" : ""}</td>
-                      <td className="text-right">{r.signals_generated}</td>
-                      <td className="text-right">{r.trades_executed}</td>
-                      <td className={`text-right ${(r.daily_pl ?? 0) >= 0 ? "text-success" : "text-destructive"}`}>{r.daily_pl != null ? fmtUSD(r.daily_pl) : "—"}</td>
-                      <td className="text-right text-muted-foreground">{r.duration_ms}ms</td>
-                      <td className="pl-4">{r.market_open ? <span className="text-success">OPEN</span> : <span className="text-muted-foreground">CLOSED</span>}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-        <footer className="text-center pt-4 pb-8">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Maverick Bot v2 · Multi-Strategy · Paper Trading · Auto-refresh 30s
-          </p>
-        </footer>
-          </TabsContent>
+        {/* Trades */}
+        <Card className="p-5">
+          <h2 className="text-sm font-semibold flex items-center gap-2 mb-4"><TrendingUp className="h-4 w-4 text-primary" /> Trade History</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="text-muted-foreground border-b border-border">
+                <tr>
+                  <th className="text-left py-2 px-2 font-medium">Time</th>
+                  <th className="text-left py-2 px-2 font-medium">Symbol</th>
+                  <th className="text-left py-2 px-2 font-medium">Contract</th>
+                  <th className="text-right py-2 px-2 font-medium">Stake</th>
+                  <th className="text-right py-2 px-2 font-medium">EV</th>
+                  <th className="text-right py-2 px-2 font-medium">P&L</th>
+                  <th className="text-center py-2 px-2 font-medium">Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                {trades.length === 0 && (
+                  <tr><td colSpan={7} className="py-6 text-center text-muted-foreground">No trades yet.</td></tr>
+                )}
+                {trades.map((t) => (
+                  <tr key={t.id} className="border-b border-border/40 hover:bg-muted/30">
+                    <td className="py-1.5 px-2 text-muted-foreground font-mono">{new Date(t.created_at).toLocaleTimeString()}</td>
+                    <td className="py-1.5 px-2 font-mono">{t.symbol}</td>
+                    <td className="py-1.5 px-2">{CONTRACT_LABEL[t.contract_type] ?? t.contract_type}{t.barrier !== null ? ` ${t.barrier}` : ""}</td>
+                    <td className="py-1.5 px-2 text-right tabular-nums">{t.stake.toFixed(2)}</td>
+                    <td className="py-1.5 px-2 text-right tabular-nums">{t.ev != null ? `${(t.ev * 100).toFixed(2)}%` : "—"}</td>
+                    <td className={`py-1.5 px-2 text-right tabular-nums font-medium ${(t.pnl ?? 0) >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      {t.pnl != null ? `${t.pnl >= 0 ? "+" : ""}${t.pnl.toFixed(2)}` : "…"}
+                    </td>
+                    <td className="py-1.5 px-2 text-center">
+                      {t.status === "open" ? <Badge variant="outline" className="text-[10px]">open</Badge>
+                        : t.won ? <Badge className="text-[10px] bg-green-500/20 text-green-500 hover:bg-green-500/30">WIN</Badge>
+                        : <Badge variant="destructive" className="text-[10px]">LOSS</Badge>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-          <TabsContent value="deriv">
-            <DerivPanel />
-          </TabsContent>
-        </Tabs>
+        <p className="text-[10px] text-center text-muted-foreground pt-4 pb-2">
+          Demo-first tool · Synthetic indices use cryptographic RNG · Past performance ≠ future results
+        </p>
       </main>
     </div>
+  );
+}
+
+function Kpi({ icon, label, value, sub, tone }: { icon: React.ReactNode; label: string; value: string; sub?: string; tone?: "pos" | "neg" | "default" }) {
+  const valColor = tone === "pos" ? "text-green-500" : tone === "neg" ? "text-red-500" : "text-foreground";
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+        <span>{label}</span>
+        {icon}
+      </div>
+      <div className={`text-xl sm:text-2xl font-semibold tabular-nums tracking-tight ${valColor}`}>{value}</div>
+      {sub && <div className="text-[10px] text-muted-foreground mt-1 truncate">{sub}</div>}
+    </Card>
   );
 }
