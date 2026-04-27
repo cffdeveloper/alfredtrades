@@ -431,6 +431,7 @@ function Dashboard() {
             <p className="eyebrow flex items-center gap-2"><HistoryIcon className="h-3 w-3" /> Audit Log</p>
             <h2 className="font-display text-2xl font-medium tracking-tight mt-1">Cycle history</h2>
             <p className="text-sm text-muted-foreground mt-1.5">Every run, signed and timestamped.</p>
+            <p className="text-[11px] text-muted-foreground/80 mt-2 italic">"Acct Day P&amp;L" = the broker's intraday equity change at the instant of the cycle. It is <span className="text-foreground/80">not</span> profit earned by that cycle. For real performance see Realized / Net P&amp;L above.</p>
           </div>
           {runs.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">No runs yet — kick one off above.</p>
