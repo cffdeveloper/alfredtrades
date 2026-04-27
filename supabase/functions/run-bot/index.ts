@@ -380,6 +380,23 @@ async function getFillPrice(orderId: string, fallbackPrice: number): Promise<num
   return fallbackPrice;
 }
 
+// Fire-and-forget AI review of a closed trade. Does not block the cycle.
+async function fireReview(symbol: string, exitTradeId: string | undefined) {
+  if (!exitTradeId) return;
+  try {
+    fetch(`${SUPABASE_URL}/functions/v1/review-trade`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SERVICE_KEY}`,
+      },
+      body: JSON.stringify({ symbol, exitTradeId }),
+    }).catch((e) => console.error("review-trade dispatch error", e));
+  } catch (e) {
+    console.error("fireReview error", e);
+  }
+}
+
 // ── Main cycle ───────────────────────────────────────────────────────────────
 async function runCycle() {
   const start = Date.now();
