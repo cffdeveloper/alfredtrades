@@ -17,6 +17,8 @@ import {
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
 } from "recharts";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { DerivPanel } from "@/components/dashboard/DerivPanel";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
