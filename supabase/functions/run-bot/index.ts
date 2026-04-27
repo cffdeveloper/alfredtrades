@@ -440,13 +440,14 @@ async function runCycle() {
 
           if (cur <= stop && marketOpen) {
             const order = await submitOrder(symbol, "sell", qty);
+            const fill = await getFillPrice(order.id, cur);
             await supabase.from("bot_trades").insert({
-              symbol, side: "sell", qty, price: cur, value: qty * cur,
+              symbol, side: "sell", qty, price: fill, value: qty * fill,
               alpaca_order_id: order.id, strategy: "stop_loss",
               stop_price: stop, target_price: target, confidence: 100,
             });
             await supabase.from("bot_signals").insert({
-              symbol, signal: "STOP-LOSS", price: cur, reason: `Stop $${stop.toFixed(2)} hit`,
+              symbol, signal: "STOP-LOSS", price: fill, reason: `Stop $${stop.toFixed(2)} hit`,
               strategy: "RiskMgmt", confidence: 100, regime,
             });
             tradesExecuted++; openCount--;
@@ -454,8 +455,9 @@ async function runCycle() {
           }
           if (cur >= target && marketOpen) {
             const order = await submitOrder(symbol, "sell", qty);
+            const fill = await getFillPrice(order.id, cur);
             await supabase.from("bot_trades").insert({
-              symbol, side: "sell", qty, price: cur, value: qty * cur,
+              symbol, side: "sell", qty, price: fill, value: qty * fill,
               alpaca_order_id: order.id, strategy: "take_profit",
               stop_price: stop, target_price: target, confidence: 95,
             });
@@ -464,8 +466,9 @@ async function runCycle() {
           }
           if ((best.signal === "SELL" || best.signal === "STRONG_SELL") && marketOpen) {
             const order = await submitOrder(symbol, "sell", qty);
+            const fill = await getFillPrice(order.id, ind.price);
             await supabase.from("bot_trades").insert({
-              symbol, side: "sell", qty, price: ind.price, value: qty * ind.price,
+              symbol, side: "sell", qty, price: fill, value: qty * fill,
               alpaca_order_id: order.id, strategy: best.strategy,
               stop_price: stop, target_price: target, confidence: best.confidence,
             });
@@ -485,10 +488,13 @@ async function runCycle() {
             const stop = ind.price - ind.atr * ATR_STOP_MULT;
             const target = ind.price + ind.atr * ATR_PROFIT_MULT;
             const order = await submitOrder(symbol, "buy", qty);
+            const fill = await getFillPrice(order.id, ind.price);
             await supabase.from("bot_trades").insert({
-              symbol, side: "buy", qty, price: ind.price, value: qty * ind.price,
+              symbol, side: "buy", qty, price: fill, value: qty * fill,
               alpaca_order_id: order.id, strategy: best.strategy,
-              stop_price: stop, target_price: target, confidence: best.confidence,
+              stop_price: fill - ind.atr * ATR_STOP_MULT,
+              target_price: fill + ind.atr * ATR_PROFIT_MULT,
+              confidence: best.confidence,
             });
             tradesExecuted++; openCount++;
           }
