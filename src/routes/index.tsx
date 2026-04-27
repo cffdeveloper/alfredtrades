@@ -200,9 +200,9 @@ function Dashboard() {
       <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14 space-y-8 sm:space-y-12">
         {/* Thesis line — italic serif, the page's voice */}
         <section className="max-w-3xl">
-          <p className="eyebrow mb-2 sm:mb-3">The Thesis</p>
-          <p className="font-display italic text-base sm:text-2xl lg:text-3xl text-foreground leading-snug tracking-tight">
-            Disciplined capital, deployed by rule.
+          <p className="eyebrow mb-2 sm:mb-3 !text-[var(--gold)]">— The Thesis —</p>
+          <p className="font-serif italic text-lg sm:text-3xl lg:text-4xl text-foreground leading-snug tracking-tight">
+            <span className="font-display not-italic text-primary">D</span>isciplined capital, deployed by rule.
             <span className="text-muted-foreground"> A multi-strategy engine that reads the regime before it reads the price.</span>
           </p>
         </section>
