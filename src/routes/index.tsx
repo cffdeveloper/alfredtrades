@@ -138,7 +138,7 @@ function Dashboard() {
       {/* Bull & Bear watermark — fixed, very faint */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-0 flex justify-center opacity-[0.045] select-none"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-0 flex justify-center opacity-[0.18] select-none mix-blend-multiply"
       >
         <img
           src={bullBearImg}
