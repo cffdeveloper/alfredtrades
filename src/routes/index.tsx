@@ -7,8 +7,8 @@ import { SignalBadge } from "@/components/dashboard/SignalBadge";
 import { fmtUSD, fmtPct, fmtTime } from "@/lib/format";
 import { computeRealizedPnL } from "@/lib/pnl";
 import { toast } from "sonner";
-import bullBearImg from "@/assets/bull-bear.png";
-import bullMark from "@/assets/bull-mark.png";
+import bullBearImg from "@/assets/bull-bear-color.png";
+import bullMark from "@/assets/bull-mark-color.png";
 import {
   Activity, Play, RefreshCw, Brain, Layers,
   Zap,
