@@ -62,20 +62,26 @@ function Dashboard() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [trades, setTrades] = useState<Trade[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
+  const [reviews, setReviews] = useState<TradeReview[]>([]);
+  const [weights, setWeights] = useState<SignalWeight[]>([]);
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadAll = async () => {
-    const [snapRes, sigRes, trdRes, runRes] = await Promise.all([
+    const [snapRes, sigRes, trdRes, runRes, revRes, wRes] = await Promise.all([
       supabase.from("portfolio_snapshots").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("bot_signals").select("*").order("created_at", { ascending: false }).limit(80),
       supabase.from("bot_trades").select("*").order("created_at", { ascending: false }).limit(80),
       supabase.from("bot_runs").select("*").order("created_at", { ascending: false }).limit(20),
+      supabase.from("trade_reviews").select("*").order("created_at", { ascending: false }).limit(10),
+      supabase.from("signal_weights").select("*").order("weight", { ascending: false }),
     ]);
     if (snapRes.data) setSnapshots(snapRes.data as unknown as Snapshot[]);
     if (sigRes.data) setSignals(sigRes.data as unknown as Signal[]);
     if (trdRes.data) setTrades(trdRes.data as unknown as Trade[]);
     if (runRes.data) setRuns(runRes.data as unknown as Run[]);
+    if (revRes.data) setReviews(revRes.data as unknown as TradeReview[]);
+    if (wRes.data) setWeights(wRes.data as unknown as SignalWeight[]);
     setLoading(false);
   };
 
