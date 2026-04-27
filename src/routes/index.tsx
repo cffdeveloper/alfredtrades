@@ -134,28 +134,40 @@ function Dashboard() {
   const stratData = Object.entries(stratCounts).map(([strategy, count]) => ({ strategy, count }));
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Bull & Bear watermark — fixed, very faint */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-0 flex justify-center opacity-[0.045] select-none"
+      >
+        <img
+          src={bullBearImg}
+          alt=""
+          className="w-[min(1400px,140vw)] max-w-none"
+        />
+      </div>
+
       {/* Header */}
-      <header className="relative border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20">
+      <header className="relative border-b border-border bg-background/85 backdrop-blur-xl sticky top-0 z-20">
         <div className="absolute inset-0 blueprint-grid opacity-60 pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)" }} />
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-5 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-md flex items-center justify-center bg-primary text-primary-foreground font-display text-xl font-medium tracking-tight">
-              M
+        <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 flex items-center justify-between flex-wrap gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-md flex items-center justify-center bg-primary overflow-hidden shrink-0">
+              <img src={bullMark} alt="Maverick" className="h-full w-full object-cover" />
             </div>
-            <div className="flex flex-col">
-              <h1 className="font-display text-2xl font-medium leading-none tracking-tight text-foreground flex items-baseline gap-2">
+            <div className="flex flex-col min-w-0">
+              <h1 className="font-display text-lg sm:text-2xl font-medium leading-none tracking-tight text-foreground flex items-baseline gap-1.5 sm:gap-2">
                 Maverick<span className="text-primary">.</span>
-                <span className="eyebrow ml-1 -translate-y-0.5">v2.0</span>
+                <span className="eyebrow ml-0.5 sm:ml-1 -translate-y-0.5 hidden sm:inline">v2.0</span>
               </h1>
-              <p className="eyebrow mt-1.5 text-muted-foreground">
-                Multi-Strategy · Regime-Adaptive Engine
+              <p className="eyebrow mt-1 sm:mt-1.5 text-muted-foreground text-[9px] sm:text-[10px] truncate">
+                Multi-Strategy · Regime-Adaptive
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {lastRun?.halt_entries && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/40 bg-destructive/5 text-destructive text-xs font-medium">
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/40 bg-destructive/5 text-destructive text-xs font-medium">
                 <Zap className="h-3 w-3" /> Daily Loss Halt
               </div>
             )}
@@ -166,26 +178,28 @@ function Dashboard() {
               </span>
               <span className="eyebrow !text-muted-foreground">{lastRun?.market_open ? "Market Live" : "Market Closed"}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={loadAll} disabled={loading} className="text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="sm" onClick={loadAll} disabled={loading} className="text-muted-foreground hover:text-foreground h-8 w-8 sm:h-9 sm:w-9 p-0">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             </Button>
             <Button
               onClick={runBot}
               disabled={running}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium tracking-wide"
+              size="sm"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium tracking-wide text-xs sm:text-sm h-8 sm:h-9 px-3"
             >
-              <Play className="h-3.5 w-3.5 mr-2" fill="currentColor" />
-              {running ? "Executing…" : "Run Cycle"}
+              <Play className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" fill="currentColor" />
+              {running ? "…" : "Run"}
+              <span className="hidden sm:inline">&nbsp;Cycle</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-10 lg:py-14 space-y-12">
+      <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14 space-y-8 sm:space-y-12">
         {/* Thesis line — italic serif, the page's voice */}
         <section className="max-w-3xl">
-          <p className="eyebrow mb-3">The Thesis</p>
-          <p className="font-display italic text-2xl lg:text-3xl text-foreground leading-snug tracking-tight">
+          <p className="eyebrow mb-2 sm:mb-3">The Thesis</p>
+          <p className="font-display italic text-base sm:text-2xl lg:text-3xl text-foreground leading-snug tracking-tight">
             Disciplined capital, deployed by rule.
             <span className="text-muted-foreground"> A multi-strategy engine that reads the regime before it reads the price.</span>
           </p>
@@ -193,12 +207,13 @@ function Dashboard() {
 
         {/* Hero metrics */}
         <section>
-          <p className="eyebrow mb-4">Portfolio · Live</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <MetricCard ornament="01" label="Portfolio Value" value={latest ? fmtUSD(latest.portfolio_value) : "—"} sub="Live equity + cash" />
+          <p className="eyebrow mb-3 sm:mb-4">Portfolio · Live</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
+            <MetricCard ornament="01" label="Portfolio Value" value={latest ? fmtUSD(latest.portfolio_value) : "—"} sub="Equity + cash" />
             <MetricCard ornament="02" label="Daily P&L" value={latest || lastRun ? fmtUSD(dailyPL) : "—"} sub="Today vs last close" tone={dailyPL >= 0 ? "positive" : "negative"} />
-            <MetricCard ornament="03" label="Total Return" value={latest ? fmtPct(totalReturn) : "—"} sub={latest ? `Since ${fmtTime(first!.created_at)}` : ""} tone={totalReturn >= 0 ? "positive" : "negative"} />
-            <MetricCard ornament="04" label="Open / Max" value={`${positions.length} / 4`} sub={`${trades.length} trades · Cash ${latest ? fmtUSD(latest.cash, 0) : "—"}`} />
+            <MetricCard ornament="03" label="Realized P&L" value={trades.length ? fmtUSD(realizedPL) : "—"} sub="Closed round-trips" tone={realizedPL >= 0 ? "positive" : "negative"} />
+            <MetricCard ornament="04" label="Unrealized P&L" value={positions.length ? fmtUSD(unrealizedPL) : "—"} sub={`${positions.length} open · ${positions.length}/4 max`} tone={unrealizedPL >= 0 ? "positive" : "negative"} />
+            <MetricCard ornament="05" label="Net P&L" value={(trades.length || positions.length) ? fmtUSD(totalPL) : "—"} sub={latest ? `Return ${fmtPct(totalReturn)}` : ""} tone={totalPL >= 0 ? "positive" : "negative"} />
           </div>
         </section>
 
