@@ -186,7 +186,8 @@ function Dashboard() {
               onClick={runBot}
               disabled={running}
               size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium tracking-wide text-xs sm:text-sm h-8 sm:h-9 px-3"
+              className="rounded-md font-medium tracking-wide text-xs sm:text-sm h-8 sm:h-9 px-3 text-primary-foreground shadow-md border border-[var(--gold)]/40"
+              style={{ background: "var(--gradient-primary)" }}
             >
               <Play className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" fill="currentColor" />
               {running ? "…" : "Run"}
