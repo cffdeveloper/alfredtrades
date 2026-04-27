@@ -365,6 +365,21 @@ async function submitOrder(symbol: string, side: "buy" | "sell", qty: number) {
   return alpacaPost(`${ALPACA_BASE}/v2/orders`, { symbol, qty, side, type: "market", time_in_force: "day" });
 }
 
+// Poll an order up to ~3s for the real fill price. Falls back to fallbackPrice
+// if the order is still pending — but we always log the TRUE price when we have it.
+async function getFillPrice(orderId: string, fallbackPrice: number): Promise<number> {
+  for (let i = 0; i < 6; i++) {
+    try {
+      const o = await alpacaGet(`${ALPACA_BASE}/v2/orders/${orderId}`);
+      const fap = parseFloat(o?.filled_avg_price ?? "");
+      if (isFinite(fap) && fap > 0) return fap;
+      if (o?.status === "rejected" || o?.status === "canceled") return fallbackPrice;
+    } catch { /* retry */ }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  return fallbackPrice;
+}
+
 // ── Main cycle ───────────────────────────────────────────────────────────────
 async function runCycle() {
   const start = Date.now();
