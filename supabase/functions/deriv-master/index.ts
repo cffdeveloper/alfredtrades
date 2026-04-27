@@ -335,7 +335,9 @@ async function runCycle() {
         const ask = parseFloat(msg.proposal.ask_price ?? msg.proposal.display_value ?? "0");
         const payout = parseFloat(msg.proposal.payout ?? "0");
         if (ask > 0 && payout > 0) {
-          const payoutRatio = (payout - ask) / ask; // profit per $1 stake
+          // Deriv `payout` = total return (stake + profit). Profit per $1 stake = (payout - ask)/ask, but never > 1 for digit contracts.
+          const payoutRatio = Math.max(0, (payout - ask) / ask);
+          if (payoutRatio > 20) continue; // sanity guard against malformed proposal
           // Use *blended* prob: weighted average of theoretical + statistical
           const w = Math.min(0.5, p.combo.statConf);
           const pBlend = p.combo.theoP * (1 - w) + p.combo.statP * w;
