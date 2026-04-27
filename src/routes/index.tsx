@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SignalBadge } from "@/components/dashboard/SignalBadge";
 import { fmtUSD, fmtPct, fmtTime } from "@/lib/format";
+import { computeRealizedPnL } from "@/lib/pnl";
 import { toast } from "sonner";
+import bullBearImg from "@/assets/bull-bear.png";
+import bullMark from "@/assets/bull-mark.png";
 import {
   Activity, Play, RefreshCw, Brain, Layers,
-  Zap, Cpu, Terminal, Briefcase,
+  Zap,
   ClockIcon as HistoryIcon, LineChart as LineChartIcon, Signal as SignalIcon,
 } from "lucide-react";
 import {
@@ -101,10 +104,17 @@ function Dashboard() {
 
   const latest = snapshots[0];
   const first = snapshots[snapshots.length - 1];
-  const totalReturn = latest && first ? ((latest.equity - first.equity) / first.equity) * 100 : 0;
+  const totalReturn = latest && first && first.equity > 0
+    ? ((latest.equity - first.equity) / first.equity) * 100
+    : 0;
   const lastRun = runs[0];
   const positions = latest?.positions ?? [];
   const dailyPL = latest?.daily_pl ?? lastRun?.daily_pl ?? 0;
+
+  // P&L breakdown
+  const realizedPL = useMemo(() => computeRealizedPnL(trades), [trades]);
+  const unrealizedPL = positions.reduce((sum, p) => sum + Number(p.unrealized_pl ?? 0), 0);
+  const totalPL = realizedPL + unrealizedPL;
 
   const equitySeries = [...snapshots].reverse().map((s) => ({
     t: new Date(s.created_at).getTime(),
