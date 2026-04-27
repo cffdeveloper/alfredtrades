@@ -433,6 +433,82 @@ function Dashboard() {
           </div>
         </section>
 
+        {/* Bot Brain — AI learning loop */}
+        <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
+          <div className="mb-6">
+            <p className="eyebrow flex items-center gap-2"><Brain className="h-3 w-3" /> Bot Brain</p>
+            <h2 className="font-display text-2xl font-medium tracking-tight mt-1">AI trade reviews & adaptive weights</h2>
+            <p className="text-sm text-muted-foreground mt-1.5">After every closed trade, AI reviews what worked and tunes signal weights for the next cycle.</p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Reviews */}
+            <div className="lg:col-span-2 space-y-3">
+              <p className="eyebrow text-[10px]">Latest reviews</p>
+              {reviews.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-6 text-center border border-dashed border-border rounded-lg">
+                  No closed round-trips yet. Reviews appear automatically when a position closes.
+                </p>
+              ) : (
+                reviews.map((r) => (
+                  <div key={r.id} className="border border-border rounded-lg p-4 bg-background/40">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm font-semibold">{r.symbol}</span>
+                        {r.regime && <span className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${REGIME_COLORS[r.regime] ?? REGIME_COLORS.UNKNOWN}`}>{r.regime}</span>}
+                        <span className="text-[10px] uppercase text-muted-foreground">{r.exit_reason}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className={`font-mono text-sm font-semibold ${r.pnl >= 0 ? "text-success" : "text-destructive"}`}>{fmtUSD(r.pnl)}</div>
+                        <div className={`font-mono text-[10px] ${r.pnl >= 0 ? "text-success" : "text-destructive"}`}>{r.pnl_pct >= 0 ? "+" : ""}{r.pnl_pct.toFixed(2)}%</div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-foreground/90 leading-snug">{r.ai_verdict}</p>
+                    {r.ai_lesson && <p className="text-xs text-muted-foreground italic mt-1.5">→ {r.ai_lesson}</p>}
+                    {r.ai_weight_adjustments && r.ai_weight_adjustments.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {r.ai_weight_adjustments.map((a, i) => (
+                          <span key={i} className={`font-mono text-[10px] px-1.5 py-0.5 rounded border ${a.delta >= 0 ? "border-success/40 text-success bg-success/5" : "border-destructive/40 text-destructive bg-destructive/5"}`}>
+                            {a.signal_name}/{a.regime} {a.delta >= 0 ? "+" : ""}{a.delta.toFixed(2)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-[10px] text-muted-foreground/70 mt-2 font-mono">{fmtTime(r.created_at)}</p>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Adaptive weights */}
+            <div>
+              <p className="eyebrow text-[10px] mb-3">Current signal weights</p>
+              <div className="space-y-2">
+                {weights.map((w) => {
+                  const total = w.wins + w.losses;
+                  const wr = total > 0 ? Math.round((w.wins / total) * 100) : null;
+                  const pct = Math.min(100, (w.weight / 2) * 100);
+                  return (
+                    <div key={w.id} className="border border-border rounded-md p-2.5 bg-background/40">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-mono text-xs">{w.signal_name}</span>
+                        <span className="font-mono text-xs tabular-nums font-semibold">{w.weight.toFixed(2)}×</span>
+                      </div>
+                      <div className="h-1 rounded-full bg-muted overflow-hidden mb-1">
+                        <div className={`h-full ${w.weight >= 1 ? "bg-success" : "bg-destructive"}`} style={{ width: `${pct}%` }} />
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
+                        <span>{w.regime}</span>
+                        <span>{total > 0 ? `${w.wins}W/${w.losses}L · ${wr}%` : "no data"}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Recent runs */}
         <section className="tech-card rounded-xl border border-border bg-card p-6 lg:p-8" style={{ boxShadow: "var(--shadow-card)" }}>
           <div className="mb-6">
