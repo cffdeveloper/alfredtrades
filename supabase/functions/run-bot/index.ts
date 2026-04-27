@@ -421,7 +421,7 @@ async function runCycle() {
           const cur = parseFloat(position.current_price);
           const stop = entry - ind.atr * ATR_STOP_MULT;
           const target = entry + ind.atr * ATR_PROFIT_MULT;
-          const qty = Math.abs(parseInt(position.qty));
+          const qty = Math.abs(parseFloat(position.qty));
 
           if (cur <= stop && marketOpen) {
             const order = await submitOrder(symbol, "sell", qty);
