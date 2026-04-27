@@ -259,3 +259,18 @@
   border-right: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
   pointer-events: none;
 }
+
+/* Mobile-first font shrinking for dashboard. */
+@media (max-width: 640px) {
+  section h2.font-display {
+    font-size: 1.125rem !important; /* 18px */
+    line-height: 1.2;
+  }
+  section .eyebrow { font-size: 9px; letter-spacing: 0.18em; }
+  .tech-card { padding: 1rem !important; }
+  table.font-mono { font-size: 11px; }
+  table.font-mono th, table.font-mono td {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+}
