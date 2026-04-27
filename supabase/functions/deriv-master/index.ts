@@ -295,6 +295,7 @@ async function runCycle() {
     const combos: Combo[] = [];
     for (const sym of SYMBOLS) {
       const { probs, conf } = compositeProbs(histories[sym]);
+      if (histories[sym].length < MIN_HISTORY) continue;
       if (conf < MIN_STAT_CONF) continue;
       // For each contract type, pick the most promising barrier(s)
       const types: Array<{ ct: string; barriers: (number | null)[] }> = [
