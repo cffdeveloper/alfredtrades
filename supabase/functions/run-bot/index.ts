@@ -471,9 +471,12 @@ async function runCycle() {
         const { regime, conf: regimeConf } = detectRegime(ind);
         regimeSummary[symbol] = { regime, conf: regimeConf };
 
-        const sigVwap = stratVWAPZScore(ind);
-        const sigMom = stratMomentum(ind, regime);
-        const sigOrb = bars5m.length ? stratORB(symbol, ind.price, bars5m) : { signal: "HOLD" as SignalType, confidence: 0, reason: "ORB skipped (market closed)", strategy: "ORB" };
+        const sigVwapRaw = stratVWAPZScore(ind);
+        const sigMomRaw = stratMomentum(ind, regime);
+        const sigOrbRaw = bars5m.length ? stratORB(symbol, ind.price, bars5m) : { signal: "HOLD" as SignalType, confidence: 0, reason: "ORB skipped (market closed)", strategy: "ORB" };
+        const sigVwap = applyWeight(sigVwapRaw, weightFor(weights, "VWAP_ZScore", regime));
+        const sigMom = applyWeight(sigMomRaw, weightFor(weights, "Momentum", regime));
+        const sigOrb = applyWeight(sigOrbRaw, weightFor(weights, "ORB", regime));
         const best = combine([sigVwap, sigMom, sigOrb]);
         signalsGenerated++;
 
