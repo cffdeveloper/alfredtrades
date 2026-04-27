@@ -453,6 +453,8 @@ async function runCycle() {
     dailyPL = equity - lastEq;
     haltEntries = lastEq > 0 && (dailyPL / lastEq) < -DAILY_LOSS_LIMIT;
 
+    const weights = await loadWeights();
+
     const openPositionsList = await alpacaGet(`${ALPACA_BASE}/v2/positions`);
     let openCount = openPositionsList.length;
 
