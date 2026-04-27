@@ -443,7 +443,7 @@ function Dashboard() {
                     <th className="text-left py-2">Status</th>
                     <th className="text-right py-2">Signals</th>
                     <th className="text-right py-2">Trades</th>
-                    <th className="text-right py-2">Daily P&amp;L</th>
+                    <th className="text-right py-2" title="Account intraday P&L at the moment of this cycle — NOT profit from this cycle alone">Acct Day P&amp;L</th>
                     <th className="text-right py-2">Duration</th>
                     <th className="text-left py-2 pl-4">Market</th>
                   </tr>
