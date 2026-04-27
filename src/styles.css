@@ -185,9 +185,9 @@
 
   #root, main, header { position: relative; z-index: 1; }
 
-  .font-mono { font-family: var(--font-mono); }
-  .font-display { font-family: var(--font-display); font-feature-settings: "ss01", "ss02", "lnum"; }
-  .font-serif { font-family: var(--font-serif); }
+  .font-mono { font-family: var(--font-mono); letter-spacing: -0.01em; }
+  .font-display { font-family: var(--font-display); letter-spacing: -0.02em; font-feature-settings: "ss01", "ss02", "tnum"; }
+  .font-serif { font-family: var(--font-serif); letter-spacing: -0.005em; }
 }
 
 /* ---- Decorative utilities (the "blueprint" feel, financial restraint) ---- */
