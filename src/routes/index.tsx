@@ -7,8 +7,8 @@ import { SignalBadge } from "@/components/dashboard/SignalBadge";
 import { fmtUSD, fmtPct, fmtTime } from "@/lib/format";
 import { computeRealizedPnL } from "@/lib/pnl";
 import { toast } from "sonner";
-import bullBearImg from "@/assets/bull-bear.png";
-import bullMark from "@/assets/bull-mark.png";
+import bullBearImg from "@/assets/bull-bear-color.png";
+import bullMark from "@/assets/bull-mark-color.png";
 import {
   Activity, Play, RefreshCw, Brain, Layers,
   Zap,
@@ -138,7 +138,7 @@ function Dashboard() {
       {/* Bull & Bear watermark — fixed, very faint */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-0 flex justify-center opacity-[0.045] select-none"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-0 flex justify-center opacity-[0.18] select-none mix-blend-multiply"
       >
         <img
           src={bullBearImg}
@@ -152,15 +152,16 @@ function Dashboard() {
         <div className="absolute inset-0 blueprint-grid opacity-60 pointer-events-none" style={{ maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)" }} />
         <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 flex items-center justify-between flex-wrap gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-md flex items-center justify-center bg-primary overflow-hidden shrink-0">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-md flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-[var(--gold)]/60 shadow-md">
               <img src={bullMark} alt="Maverick" className="h-full w-full object-cover" />
             </div>
             <div className="flex flex-col min-w-0">
-              <h1 className="font-display text-lg sm:text-2xl font-medium leading-none tracking-tight text-foreground flex items-baseline gap-1.5 sm:gap-2">
-                Maverick<span className="text-primary">.</span>
-                <span className="eyebrow ml-0.5 sm:ml-1 -translate-y-0.5 hidden sm:inline">v2.0</span>
+              <h1 className="font-display text-xl sm:text-3xl font-semibold leading-none tracking-tight flex items-baseline gap-1.5 sm:gap-2">
+                <span className="bg-gradient-to-br from-primary via-[var(--primary-glow)] to-[var(--gold)] bg-clip-text text-transparent">Maverick</span>
+                <span className="text-[var(--gold)]">.</span>
+                <span className="eyebrow ml-0.5 sm:ml-1 -translate-y-1 hidden sm:inline !text-[var(--gold)]">v2.0</span>
               </h1>
-              <p className="eyebrow mt-1 sm:mt-1.5 text-muted-foreground text-[9px] sm:text-[10px] truncate">
+              <p className="font-serif italic mt-0.5 sm:mt-1 text-muted-foreground text-[11px] sm:text-sm truncate tracking-wide">
                 Multi-Strategy · Regime-Adaptive
               </p>
             </div>
@@ -185,7 +186,8 @@ function Dashboard() {
               onClick={runBot}
               disabled={running}
               size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md font-medium tracking-wide text-xs sm:text-sm h-8 sm:h-9 px-3"
+              className="rounded-md font-medium tracking-wide text-xs sm:text-sm h-8 sm:h-9 px-3 text-primary-foreground shadow-md border border-[var(--gold)]/40"
+              style={{ background: "var(--gradient-primary)" }}
             >
               <Play className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2" fill="currentColor" />
               {running ? "…" : "Run"}
@@ -198,9 +200,9 @@ function Dashboard() {
       <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14 space-y-8 sm:space-y-12">
         {/* Thesis line — italic serif, the page's voice */}
         <section className="max-w-3xl">
-          <p className="eyebrow mb-2 sm:mb-3">The Thesis</p>
-          <p className="font-display italic text-base sm:text-2xl lg:text-3xl text-foreground leading-snug tracking-tight">
-            Disciplined capital, deployed by rule.
+          <p className="eyebrow mb-2 sm:mb-3 !text-[var(--gold)]">— The Thesis —</p>
+          <p className="font-serif italic text-lg sm:text-3xl lg:text-4xl text-foreground leading-snug tracking-tight">
+            <span className="font-display not-italic text-primary">D</span>isciplined capital, deployed by rule.
             <span className="text-muted-foreground"> A multi-strategy engine that reads the regime before it reads the price.</span>
           </p>
         </section>
@@ -251,19 +253,20 @@ function Dashboard() {
               <AreaChart data={equitySeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="eq" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0.18} />
-                    <stop offset="100%" stopColor="oklch(0.28 0.06 255)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="oklch(0.42 0.13 160)" stopOpacity={0.45} />
+                    <stop offset="50%" stopColor="oklch(0.72 0.14 75)" stopOpacity={0.18} />
+                    <stop offset="100%" stopColor="oklch(0.42 0.13 160)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="oklch(0.91 0.005 250)" strokeDasharray="2 4" vertical={false} />
-                <XAxis dataKey="label" stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
+                <CartesianGrid stroke="oklch(0.82 0.04 85)" strokeDasharray="2 4" vertical={false} />
+                <XAxis dataKey="label" stroke="oklch(0.45 0.04 130)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="oklch(0.45 0.04 130)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} domain={["auto", "auto"]} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.91 0.005 250)", borderRadius: 6, fontSize: 12 }}
-                  labelStyle={{ color: "oklch(0.48 0.015 250)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.15em" }}
+                  contentStyle={{ background: "oklch(0.985 0.012 85)", border: "1px solid oklch(0.72 0.14 75)", borderRadius: 6, fontSize: 12 }}
+                  labelStyle={{ color: "oklch(0.45 0.04 130)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.15em" }}
                   formatter={(v: number) => fmtUSD(v)}
                 />
-                <Area type="monotone" dataKey="equity" stroke="oklch(0.28 0.06 255)" strokeWidth={1.5} fill="url(#eq)" />
+                <Area type="monotone" dataKey="equity" stroke="oklch(0.42 0.13 160)" strokeWidth={2} fill="url(#eq)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -286,11 +289,11 @@ function Dashboard() {
             <div className="h-44">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stratData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="oklch(0.91 0.005 250)" strokeDasharray="2 4" vertical={false} />
-                  <XAxis dataKey="strategy" stroke="oklch(0.48 0.015 250)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="oklch(0.48 0.015 250)" fontSize={11} allowDecimals={false} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.91 0.005 250)", borderRadius: 6, fontSize: 12 }} />
-                  <Bar dataKey="count" fill="oklch(0.28 0.06 255)" radius={[3, 3, 0, 0]} />
+                  <CartesianGrid stroke="oklch(0.82 0.04 85)" strokeDasharray="2 4" vertical={false} />
+                  <XAxis dataKey="strategy" stroke="oklch(0.45 0.04 130)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="oklch(0.45 0.04 130)" fontSize={11} allowDecimals={false} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={{ background: "oklch(0.985 0.012 85)", border: "1px solid oklch(0.82 0.04 85)", borderRadius: 6, fontSize: 12 }} />
+                  <Bar dataKey="count" fill="oklch(0.42 0.13 160)" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -339,13 +342,13 @@ function Dashboard() {
               <div className="mt-6 h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={positions}>
-                    <CartesianGrid stroke="oklch(0.92 0.005 250)" strokeDasharray="3 3" vertical={false} />
+                    <CartesianGrid stroke="oklch(0.82 0.04 85)" strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="symbol" stroke="oklch(0.50 0.015 250)" fontSize={11} />
                     <YAxis stroke="oklch(0.50 0.015 250)" fontSize={11} tickFormatter={(v) => `$${v}`} />
-                    <Tooltip contentStyle={{ background: "oklch(1 0 0)", border: "1px solid oklch(0.92 0.005 250)", borderRadius: 8 }} formatter={(v: number) => fmtUSD(v)} />
+                    <Tooltip contentStyle={{ background: "oklch(0.985 0.012 85)", border: "1px solid oklch(0.82 0.04 85)", borderRadius: 8 }} formatter={(v: number) => fmtUSD(v)} />
                     <Bar dataKey="unrealized_pl" radius={[6, 6, 0, 0]}>
                       {positions.map((p) => (
-                        <Cell key={p.symbol} fill={p.unrealized_pl >= 0 ? "oklch(0.78 0.18 150)" : "oklch(0.68 0.21 22)"} />
+                        <Cell key={p.symbol} fill={p.unrealized_pl >= 0 ? "oklch(0.50 0.15 155)" : "oklch(0.45 0.18 25)"} />
                       ))}
                     </Bar>
                   </BarChart>
